@@ -1,0 +1,2701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Texvo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #dc3545;
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 60px;
+            --transition-speed: 0.3s;
+        }
+
+        /* Light Mode Variables */
+        [data-theme="light"] {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --bg-primary: #000000;
+            --bg-secondary: #1a1a1a;
+            --bg-glass: rgba(26, 26, 26, 0.9);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .navbar {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            z-index: 1000;
+            transition: left var(--transition-speed) ease;
+        }
+
+        .navbar.sidebar-collapsed {
+            left: var(--sidebar-collapsed-width);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-color);
+            z-index: 1001;
+            transition: width var(--transition-speed) ease;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .menu-item.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .menu-item i {
+            min-width: 20px;
+            margin-right: 1rem;
+            text-align: center;
+        }
+
+        .menu-text {
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+        }
+
+        .sidebar.collapsed .sidebar-logo {
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 80px;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+            transition: margin-left var(--transition-speed) ease;
+        }
+
+        .main-content.sidebar-collapsed {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .welcome-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .role-badge {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #fd7e14 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .admin-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .admin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px var(--shadow);
+        }        .admin-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        /* Advanced Dashboard Styles */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 32px var(--shadow);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideInUp 0.6s ease-out forwards;
+        }        .metric-card:nth-child(1) { animation-delay: 0.1s; }
+        .metric-card:nth-child(2) { animation-delay: 0.2s; }
+        .metric-card:nth-child(3) { animation-delay: 0.3s; }
+        .metric-card:nth-child(4) { animation-delay: 0.4s; }
+        .metric-card:nth-child(5) { animation-delay: 0.5s; }
+        .metric-card:nth-child(6) { animation-delay: 0.6s; }
+
+        .metric-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px var(--shadow);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 20px 20px 0 0;
+        }        .metric-card[data-metric="ongoing"]::before {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .metric-card[data-metric="task-due"]::before {
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+        }
+
+        .metric-card[data-metric="payments"]::before {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+        }
+
+        .metric-card[data-metric="payment-received"]::before {
+            background: linear-gradient(90deg, #43e97b, #38f9d7);
+        }
+
+        .metric-card[data-metric="payment-pending"]::before {
+            background: linear-gradient(90deg, #ffa726, #ff7043);
+        }        .metric-card[data-metric="monthly"]::before {
+            background: linear-gradient(90deg, #ab47bc, #8e24aa);
+        }
+
+        .metric-card[data-metric="currency-usd"]::before {
+            background: linear-gradient(90deg, #28a745, #20c997);
+        }
+
+        .metric-card[data-metric="currency-eur"]::before {
+            background: linear-gradient(90deg, #007bff, #6f42c1);
+        }
+
+        .metric-card[data-metric="currency-gbp"]::before {
+            background: linear-gradient(90deg, #dc3545, #e83e8c);
+        }
+
+        .metric-card[data-metric="currency-inr"]::before {
+            background: linear-gradient(90deg, #fd7e14, #ffc107);
+        }
+
+        .metric-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }        .metric-card[data-metric="ongoing"] .metric-icon {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            color: #667eea;
+        }
+
+        .metric-card[data-metric="task-due"] .metric-icon {
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1));
+            color: #f093fb;
+        }
+
+        .metric-card[data-metric="payments"] .metric-icon {
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+            color: #4facfe;
+        }
+
+        .metric-card[data-metric="payment-received"] .metric-icon {
+            background: linear-gradient(135deg, rgba(67, 233, 123, 0.1), rgba(56, 249, 215, 0.1));
+            color: #43e97b;
+        }
+
+        .metric-card[data-metric="payment-pending"] .metric-icon {
+            background: linear-gradient(135deg, rgba(255, 167, 38, 0.1), rgba(255, 112, 67, 0.1));
+            color: #ffa726;
+        }        .metric-card[data-metric="monthly"] .metric-icon {
+            background: linear-gradient(135deg, rgba(171, 71, 188, 0.1), rgba(142, 36, 170, 0.1));
+            color: #ab47bc;
+        }
+
+        .metric-card[data-metric="currency-usd"] .metric-icon {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1));
+            color: #28a745;
+        }
+
+        .metric-card[data-metric="currency-eur"] .metric-icon {
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(111, 66, 193, 0.1));
+            color: #007bff;
+        }
+
+        .metric-card[data-metric="currency-gbp"] .metric-icon {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(232, 62, 140, 0.1));
+            color: #dc3545;
+        }
+
+        .metric-card[data-metric="currency-inr"] .metric-icon {
+            background: linear-gradient(135deg, rgba(253, 126, 20, 0.1), rgba(255, 193, 7, 0.1));
+            color: #fd7e14;
+        }
+
+        .metric-icon i {
+            font-size: 1.8rem;
+        }
+
+        .metric-content {
+            flex: 1;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .metric-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .metric-sub {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        .metric-trend {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .metric-trend.positive {
+            background: rgba(67, 233, 123, 0.1);
+            color: #43e97b;
+        }
+
+        .metric-trend.warning {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px var(--shadow);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideInUp 0.6s ease-out forwards;
+        }
+
+        .chart-card:nth-child(1) { animation-delay: 0.5s; }
+        .chart-card:nth-child(2) { animation-delay: 0.6s; }
+        .chart-card:nth-child(3) { animation-delay: 0.7s; }
+        .chart-card:nth-child(4) { animation-delay: 0.8s; }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px var(--shadow);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .chart-header h3 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .chart-header h3 i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .chart-period {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 15px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+
+        /* Expert Payments */
+        .expert-payments {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .expert-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideInLeft 0.5s ease-out forwards;
+        }
+
+        .expert-item:hover {
+            transform: translateX(5px);
+            background: var(--border-color);
+        }
+
+        .expert-info {
+            flex: 1;
+        }
+
+        .expert-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .expert-tasks {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .expert-amount {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0 1rem;
+        }
+
+        .expert-progress {
+            width: 60px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+            transition: width 1s ease-out;
+            animation: progressFill 1.5s ease-out;
+        }
+
+        /* Mini Calendar */
+        .mini-calendar {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .calendar-task {
+            display: grid;
+            grid-template-columns: 60px 1fr 100px;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideInUp 0.5s ease-out forwards;
+        }
+
+        .calendar-task:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .task-date {
+            font-weight: 600;
+            text-align: center;
+            color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.1);
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .task-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .task-code {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .task-client {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .task-status {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .status-inprogress {
+            background: rgba(13, 202, 240, 0.1);
+            color: #0dcaf0;
+        }
+
+        .status-completed {
+            background: rgba(25, 135, 84, 0.1);
+            color: #198754;
+        }
+
+        .task-expert {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px var(--shadow);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideInUp 0.6s ease-out forwards;
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.9s; }
+        .feature-card:nth-child(2) { animation-delay: 1.0s; }
+        .feature-card:nth-child(3) { animation-delay: 1.1s; }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px var(--shadow);
+        }
+
+        .feature-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .feature-header h3 {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .feature-header h3 i {
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        /* Activity Filter */
+        .activity-filter {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Activity List */
+        .activity-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideInLeft 0.5s ease-out forwards;
+        }
+
+        .activity-item:hover {
+            transform: translateX(5px);
+            background: var(--border-color);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+
+        .task-activity .activity-icon {
+            background: rgba(67, 233, 123, 0.1);
+            color: #43e97b;
+        }
+
+        .payment-activity .activity-icon {
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* System Stats */
+        .system-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .stat-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: scale(1.05);
+            background: var(--border-color);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary-color);
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* No Data States */
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .no-data i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .no-data p {
+            margin: 0;
+            font-style: italic;
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes progressFill {
+            from {
+                width: 0%;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }        /* Number Counter Animation */
+        .counter {
+            animation: countUp 2s ease-out forwards;
+        }        .currency-note {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+            opacity: 0.8;
+        }
+
+        .currency-note i {
+            margin-right: 0.25rem;
+            color: #4facfe;
+        }
+
+        .payment-breakdown {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .completed-amount {
+            color: #43e97b;
+            font-weight: 500;
+        }
+
+        .partial-amount {
+            color: #ffa726;
+            font-weight: 500;
+        }
+
+        .payment-note {
+            color: #43e97b;
+            font-style: italic;
+        }
+
+        /* Enhanced Responsive Design */
+        @media (max-width: 1400px) {
+            .metrics-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .features-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+
+            .metric-card {
+                padding: 1.5rem;
+            }
+
+            .metric-value {
+                font-size: 2.2rem;
+            }
+
+            .chart-container {
+                height: 180px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .welcome-card {
+                padding: 1.5rem;
+            }
+
+            .welcome-card h1 {
+                font-size: 1.8rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                left: 0;
+                padding: 1rem;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 2000;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .welcome-card {
+                padding: 1.25rem;
+                margin-bottom: 1.5rem;
+                text-align: center;
+            }
+
+            .welcome-card h1 {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .welcome-card p {
+                font-size: 0.9rem;
+            }
+
+            .role-badge {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .metric-card {
+                padding: 1.25rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .metric-icon {
+                width: 50px;
+                height: 50px;
+                margin-bottom: 0;
+                flex-shrink: 0;
+            }
+
+            .metric-content {
+                flex: 1;
+                text-align: left;
+            }
+
+            .metric-value {
+                font-size: 1.8rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .metric-label {
+                font-size: 0.9rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .metric-sub {
+                font-size: 0.8rem;
+            }
+
+            .metric-trend {
+                position: relative;
+                top: auto;
+                right: auto;
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+                flex-shrink: 0;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .chart-card {
+                padding: 1rem;
+            }
+
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .chart-header h3 {
+                font-size: 1rem;
+            }
+
+            .chart-period {
+                font-size: 0.8rem;
+                align-self: flex-end;
+            }
+
+            .chart-container {
+                height: 150px;
+            }
+
+            .expert-item {
+                padding: 0.75rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .expert-info {
+                width: 100%;
+            }
+
+            .expert-amount {
+                margin: 0;
+                align-self: flex-end;
+            }
+
+            .expert-progress {
+                width: 100%;
+            }
+
+            .calendar-task {
+                grid-template-columns: 50px 1fr;
+                gap: 0.75rem;
+                padding: 0.75rem;
+            }
+
+            .task-expert {
+                display: none;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .feature-card {
+                padding: 1rem;
+            }
+
+            .feature-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .activity-filter {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.25rem;
+            }
+
+            .filter-btn {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.75rem;
+                flex: 1;
+                min-width: 60px;
+            }
+
+            .activity-item {
+                padding: 0.75rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .activity-icon {
+                width: 35px;
+                height: 35px;
+                margin-right: 0;
+            }
+
+            .activity-content {
+                width: 100%;
+            }
+
+            .activity-title {
+                font-size: 0.9rem;
+            }
+
+            .activity-meta {
+                font-size: 0.8rem;
+            }
+
+            .stat-row {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .stat-item {
+                padding: 0.75rem;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 0.5rem;
+            }
+
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                margin-right: 0;
+            }
+
+            .stat-value {
+                font-size: 1.3rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 0.75rem;
+            }
+
+            .navbar-content {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .navbar-left {
+                flex: 1;
+                min-width: 200px;
+            }
+
+            .navbar-right {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                justify-content: flex-end;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+            }
+
+            .user-info span {
+                display: none;
+            }
+
+            .logout-btn span {
+                display: none;
+            }
+
+            .logout-btn {
+                padding: 0.5rem;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .welcome-card {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .welcome-card h1 {
+                font-size: 1.3rem;
+            }
+
+            .welcome-card p {
+                font-size: 0.85rem;
+            }
+
+            .role-badge {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.75rem;
+            }
+
+            .metrics-grid {
+                gap: 0.75rem;
+            }
+
+            .metric-card {
+                padding: 1rem;
+                gap: 0.75rem;
+            }
+
+            .metric-icon {
+                width: 45px;
+                height: 45px;
+            }
+
+            .metric-icon i {
+                font-size: 1.4rem;
+            }
+
+            .metric-value {
+                font-size: 1.5rem;
+            }
+
+            .metric-label {
+                font-size: 0.85rem;
+            }
+
+            .metric-sub {
+                font-size: 0.75rem;
+            }
+
+            .metric-trend {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+            }
+
+            .charts-grid {
+                gap: 0.75rem;
+            }
+
+            .chart-card {
+                padding: 0.75rem;
+            }
+
+            .chart-header h3 {
+                font-size: 0.9rem;
+            }
+
+            .chart-period {
+                font-size: 0.75rem;
+                padding: 0.2rem 0.5rem;
+            }
+
+            .chart-container {
+                height: 120px;
+            }
+
+            .expert-item {
+                padding: 0.6rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .expert-name {
+                font-size: 0.9rem;
+            }
+
+            .expert-tasks {
+                font-size: 0.8rem;
+            }
+
+            .expert-amount {
+                font-size: 0.9rem;
+            }
+
+            .calendar-task {
+                padding: 0.6rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .task-date {
+                font-size: 0.8rem;
+                padding: 0.4rem;
+            }
+
+            .task-code {
+                font-size: 0.85rem;
+            }
+
+            .task-client {
+                font-size: 0.75rem;
+            }
+
+            .task-status {
+                font-size: 0.65rem;
+                padding: 0.15rem 0.4rem;
+            }
+
+            .features-grid {
+                gap: 0.75rem;
+            }
+
+            .feature-card {
+                padding: 0.75rem;
+            }
+
+            .feature-header {
+                margin-bottom: 1rem;
+                padding-bottom: 0.75rem;
+            }
+
+            .feature-header h3 {
+                font-size: 0.9rem;
+            }
+
+            .filter-btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.7rem;
+                min-width: 50px;
+            }
+
+            .activity-item {
+                padding: 0.6rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .activity-icon {
+                width: 30px;
+                height: 30px;
+            }
+
+            .activity-title {
+                font-size: 0.85rem;
+            }
+
+            .activity-meta {
+                font-size: 0.75rem;
+            }
+
+            .stat-item {
+                padding: 0.6rem;
+            }
+
+            .stat-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .stat-value {
+                font-size: 1.2rem;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+            }
+
+            .no-data {
+                padding: 1rem;
+            }
+
+            .no-data i {
+                font-size: 1.5rem;
+            }
+
+            .no-data p {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .metric-card {
+                min-height: 80px;
+            }
+
+            .sidebar-toggle,
+            .theme-toggle {
+                min-width: 44px;
+                min-height: 44px;
+            }
+
+            .menu-item {
+                min-height: 48px;
+                padding: 0.75rem 1.5rem;
+            }
+
+            .filter-btn {
+                min-height: 44px;
+                min-width: 80px;
+            }
+
+            .activity-item {
+                min-height: 60px;
+            }
+
+            .stat-item {
+                min-height: 70px;
+            }
+
+            .expert-item {
+                min-height: 60px;
+            }
+
+            .calendar-task {
+                min-height: 60px;
+            }
+
+            .chart-card {
+                min-height: 200px;
+            }
+
+            /* Add touch feedback */
+            .metric-card:active {
+                transform: scale(0.98);
+            }
+
+            .chart-card:active {
+                transform: scale(0.99);
+            }
+
+            .feature-card:active {
+                transform: scale(0.99);
+            }
+        }
+
+        /* Landscape orientation for small devices */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .metric-card {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .metric-content {
+                text-align: left;
+            }
+
+            .chart-container {
+                height: 140px;
+            }
+
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .welcome-card {
+                padding: 1rem 1.5rem;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 360px) {
+            .navbar {
+                padding: 0.75rem;
+            }
+
+            .main-content {
+                padding: 0.5rem;
+            }
+
+            .welcome-card {
+                padding: 0.75rem;
+            }
+
+            .welcome-card h1 {
+                font-size: 1.2rem;
+            }
+
+            .metric-card {
+                padding: 0.75rem;
+                gap: 0.5rem;
+            }
+
+            .metric-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .metric-value {
+                font-size: 1.3rem;
+            }
+
+            .chart-card {
+                padding: 0.5rem;
+            }
+
+            .feature-card {
+                padding: 0.5rem;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .metric-card::before {
+                height: 3px;
+            }
+
+            .progress-bar {
+                height: 5px;
+            }
+
+            .status-badge {
+                border-width: 0.5px;
+            }
+        }
+
+        /* Reduced motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            .metric-card,
+            .chart-card,
+            .feature-card,
+            .expert-item,
+            .calendar-task,
+            .activity-item {
+                animation: none;
+                transition: none;
+            }
+
+            .metric-icon {
+                animation: none;
+            }
+
+            .progress-fill {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">TEXVO</div>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="{% url 'accounts:admin_dashboard' %}" class="menu-item active">
+                <i class="fas fa-tachometer-alt"></i>
+                <span class="menu-text">Dashboard</span>
+            </a>
+            <a href="{% url 'accounts:user_management' %}" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span class="menu-text">User Management</span>
+            </a>
+            <a href="{% url 'accounts:task_management' %}" class="menu-item">
+                <i class="fas fa-tasks"></i>
+                <span class="menu-text">Tasks</span>
+            </a>
+            <a href="{% url 'accounts:invoice_management' %}" class="menu-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span class="menu-text">Invoices</span>
+            </a>
+            <a href="{% url 'accounts:expert_payments' %}" class="menu-item">
+                <i class="fas fa-money-bill-wave"></i>
+                <span class="menu-text">Payments</span>
+            </a>
+            <a href="{% url 'accounts:calendar_view' %}" class="menu-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="menu-text">Calendar</span>
+            </a>
+            <a href="{% url 'accounts:settings' %}" class="menu-item{% if request.resolver_match.url_name == 'settings' %} active{% endif %}">
+                <i class="fas fa-shield-alt"></i>
+                <span class="menu-text">Settings</span>
+            </a>
+            <!-- <a href="#" class="menu-item">
+                <i class="fas fa-shield-alt"></i>
+                <span class="menu-text">Maintenance</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-bell"></i>
+                <span class="menu-text">Notifications</span>
+            </a> -->
+        </nav>
+    </div>
+
+    <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <div class="navbar-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">Admin Panel</div>
+            </div>
+            <div class="navbar-right">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-info">
+                    <span>{{ user.username }}</span>
+                </div>
+                <a href="{% url 'accounts:logout' %}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>    <main class="main-content" id="mainContent">
+        <!-- Welcome Section -->
+        <div class="welcome-card">
+            <h1><i class="fas fa-crown"></i> Admin Dashboard</h1>
+            <p>Welcome back, <strong>{{ user.username }}</strong>! Here's your business overview</p>
+            <div class="role-badge">{{ user.get_role_display }}</div>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card" data-metric="ongoing">
+                <div class="metric-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" data-value="{{ dashboard_data.total_words_ongoing }}">0</div>
+                    <div class="metric-label">Words Ongoing</div>
+                    <div class="metric-sub">{{ dashboard_data.ongoing_tasks_count }} tasks active</div>
+                </div>
+                <div class="metric-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>            <div class="metric-card" data-metric="task-due">
+                <div class="metric-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" data-value="{{ dashboard_data.total_words_task_due }}">0</div>
+                    <div class="metric-label">Total Words Task Due</div>
+                    <div class="metric-sub">{{ dashboard_data.tomorrow_tasks_count }} tasks pending</div>
+                </div>
+                <div class="metric-trend warning">
+                    <i class="fas fa-exclamation"></i>
+                </div>
+            </div>            <div class="metric-card" data-metric="payments">
+                <div class="metric-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" data-value="{{ dashboard_data.total_payments_today }}">₹0</div>
+                    <div class="metric-label">Payments Today (INR)</div>
+                    <div class="metric-sub">
+                        {{ dashboard_data.today_payments_count }} transactions
+                        <div class="currency-note">
+                            <i class="fas fa-exchange-alt"></i> Live rates applied
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            </div><div class="metric-card" data-metric="payment-received">
+                <div class="metric-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" data-value="{{ dashboard_data.total_payment_received|floatformat:0 }}">0</div>
+                    <div class="metric-label">Total Payment Received (INR)</div>
+                    <div class="metric-sub">
+                        {{ dashboard_data.received_invoices_count }} payments received
+                        {% if dashboard_data.partial_payments_inr > 0 %}
+                            <br><small class="payment-breakdown">
+                                <span class="completed-amount">₹{{ dashboard_data.completed_payments_inr|floatformat:0 }} complete</span> + 
+                                <span class="partial-amount">₹{{ dashboard_data.partial_payments_inr|floatformat:0 }} partial</span>
+                            </small>
+                        {% else %}
+                            <br><small class="payment-note">All payments completed</small>
+                        {% endif %}
+                        <div class="currency-note">
+                            <i class="fas fa-exchange-alt"></i> Live rates applied • Multi-currency converted to INR
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>            <div class="metric-card" data-metric="payment-pending">
+                <div class="metric-icon">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" data-value="{{ dashboard_data.total_payment_pending }}">₹0</div>
+                    <div class="metric-label">Total Payment Pending (INR)</div>
+                    <div class="metric-sub">
+                        {{ dashboard_data.pending_invoices_count }} pending invoices
+                        <div class="currency-note">
+                            <i class="fas fa-exchange-alt"></i> Live rates applied
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-trend warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+
+            <div class="metric-card" data-metric="monthly">
+                <div class="metric-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" data-value="{{ dashboard_data.total_words_this_month }}">0</div>
+                    <div class="metric-label">Words This Month</div>
+                    <div class="metric-sub">{{ dashboard_data.this_month_tasks_count }} total tasks</div>
+                </div>
+                <div class="metric-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>        </div>
+
+        <!-- Currency Breakdown Cards -->
+        <div class="metrics-grid">
+            {% for currency_code, data in dashboard_data.currency_breakdown.items %}
+            <div class="metric-card" data-metric="currency-{{ currency_code|lower }}">
+                <div class="metric-icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" data-value="{{ data.total_paid|floatformat:0 }}">{{ data.symbol }}0</div>
+                    <div class="metric-label">Paid in {{ data.currency_name }}</div>
+                    <div class="metric-sub">
+                        {{ data.completed_count }} completed, {{ data.pending_count }} pending
+                        <br><small class="payment-breakdown">
+                            <span class="completed-amount">{{ data.symbol }}{{ data.total_paid|floatformat:0 }} / {{ data.symbol }}{{ data.total_due|floatformat:0 }}</span>
+                            {% if data.pending_amount > 0 %}
+                                <br><span class="partial-amount">{{ data.symbol }}{{ data.pending_amount|floatformat:0 }} pending</span>
+                            {% endif %}
+                        </small>
+                        <div class="currency-note">
+                            <i class="fas fa-exchange-alt"></i> ≈ ₹{{ data.total_paid_inr|floatformat:0 }} (INR)
+                        </div>
+                        <div class="expert-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ data.payment_percentage }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-trend {% if data.payment_percentage > 80 %}positive{% else %}warning{% endif %}">
+                    <i class="fas {% if data.payment_percentage > 80 %}fa-arrow-up{% else %}fa-clock{% endif %}"></i>
+                </div>
+            </div>
+            {% empty %}
+            <div class="metric-card">
+                <div class="no-data">
+                    <i class="fas fa-coins"></i>
+                    <p>No payment data available</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <!-- Payment Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-area"></i> Payment Analytics</h3>
+                    <div class="chart-period">Last 7 Days</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="paymentChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Word Count Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-bar"></i> Word Count Analytics</h3>
+                    <div class="chart-period">Last 7 Days</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="wordChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Expert Payments Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fas fa-user-tie"></i> Expert Upcoming Payments</h3>
+                    <div class="chart-period">Next 7 Days</div>
+                </div>
+                <div class="expert-payments">
+                    {% for expert in expert_payments %}
+                    <div class="expert-item" data-delay="{{ forloop.counter0 }}">
+                        <div class="expert-info">
+                            <div class="expert-name">{{ expert.expert_name }}</div>
+                            <div class="expert-tasks">{{ expert.task_count }} task{{ expert.task_count|pluralize }}</div>
+                        </div>
+                        <div class="expert-amount">₹{{ expert.amount|floatformat:0 }}</div>                        <div class="expert-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {% widthratio expert.amount 10000 100 %}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="no-data">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>No upcoming payments</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Mini Calendar -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fas fa-calendar-alt"></i> Upcoming Tasks</h3>
+                    <div class="chart-period">Next 7 Days</div>
+                </div>
+                <div class="mini-calendar">
+                    {% for task in calendar_tasks %}
+                    <div class="calendar-task" data-delay="{{ forloop.counter0 }}">
+                        <div class="task-date">{{ task.deadline_formatted }}</div>
+                        <div class="task-info">
+                            <div class="task-code">{{ task.task_code }}</div>
+                            <div class="task-client">{{ task.client_name }}</div>
+                            <div class="task-status status-{{ task.status|lower }}">{{ task.status }}</div>
+                        </div>
+                        <div class="task-expert">{{ task.allocation }}</div>
+                    </div>
+                    {% empty %}
+                    <div class="no-data">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>No upcoming tasks</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Features -->
+        <div class="features-grid">
+            <!-- Task Status Distribution -->
+            <div class="feature-card">
+                <div class="feature-header">
+                    <h3><i class="fas fa-pie-chart"></i> Task Distribution</h3>
+                </div>
+                <div class="status-chart">
+                    <canvas id="statusChart" width="300" height="300"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="feature-card activity-card">
+                <div class="feature-header">
+                    <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                    <div class="activity-filter">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="tasks">Tasks</button>
+                        <button class="filter-btn" data-filter="payments">Payments</button>
+                    </div>
+                </div>
+                <div class="activity-list">
+                    {% for task in recent_tasks %}
+                    <div class="activity-item task-activity" data-delay="{{ forloop.counter0 }}">
+                        <div class="activity-icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">New task created: {{ task.task_code }}</div>
+                            <div class="activity-meta">{{ task.client.username }} • {{ task.created_at|timesince }} ago</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% for payment in recent_payments %}
+                    <div class="activity-item payment-activity" data-delay="{{ forloop.counter0|add:recent_tasks|length }}">
+                        <div class="activity-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Payment received: ₹{{ payment.amount_paid }}</div>
+                            <div class="activity-meta">{{ payment.task.client.username }} • {{ payment.payment_date|timesince }} ago</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- System Overview -->
+            <div class="feature-card">
+                <div class="feature-header">
+                    <h3><i class="fas fa-server"></i> System Overview</h3>
+                </div>
+                <div class="system-stats">
+                    <div class="stat-row">
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-users"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value">{{ system_stats.total_users }}</div>
+                                <div class="stat-label">Total Users</div>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-user-tie"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value">{{ system_stats.total_experts }}</div>
+                                <div class="stat-label">Experts</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value">{{ system_stats.total_tasks }}</div>
+                                <div class="stat-label">Total Tasks</div>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon"><i class="fas fa-file-invoice"></i></div>
+                            <div class="stat-content">
+                                <div class="stat-value">{{ system_stats.total_invoices }}</div>
+                                <div class="stat-label">Invoices</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const themeIcon = themeToggle.querySelector('i');
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        body.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Sidebar Toggle
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const navbar = document.getElementById('navbar');
+        const mainContent = document.getElementById('mainContent');
+
+        // Mobile responsiveness
+        function handleMobileLayout() {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                sidebar.classList.remove('collapsed');
+                navbar.classList.remove('sidebar-collapsed');
+                mainContent.classList.remove('sidebar-collapsed');
+            } else {
+                sidebar.classList.remove('mobile-open');
+            }
+        }
+
+        sidebarToggle.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                navbar.classList.toggle('sidebar-collapsed');
+                mainContent.classList.toggle('sidebar-collapsed');
+                
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            }
+        });
+
+        window.addEventListener('resize', handleMobileLayout);
+        handleMobileLayout();
+
+        // Close mobile sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !sidebarToggle.contains(e.target) &&
+                sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+
+        // Menu item active state
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                // Only prevent default for items with href="#"
+                if (item.getAttribute('href') === '#') {
+                    e.preventDefault();
+                }
+                // Remove active class from all items
+                menuItems.forEach(mi => mi.classList.remove('active'));
+                // Add active class to clicked item
+                item.classList.add('active');
+            });
+        });        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });        // Enhanced counter animation with currency formatting
+        function animateCounters() {
+            const counters = document.querySelectorAll('.metric-value[data-value]');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-value')) || 0;
+                const metricType = counter.closest('.metric-card').getAttribute('data-metric');
+                let current = 0;
+                const increment = target / 50;
+                const isPaymentMetric = ['payments', 'payment-received', 'payment-pending'].includes(metricType);
+                
+                const updateCounter = () => {
+                    if (current < target) {
+                        current += increment;
+                        if (current > target) current = target;
+                        
+                        if (isPaymentMetric) {
+                            // Format payment values with rupee symbol
+                            counter.textContent = '₹' + Math.floor(current).toLocaleString('en-IN');
+                        } else {
+                            // Format regular numbers
+                            counter.textContent = Math.floor(current).toLocaleString('en-IN');
+                        }
+                        
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        // Final value with proper formatting
+                        if (isPaymentMetric) {
+                            counter.textContent = '₹' + target.toLocaleString('en-IN');
+                        } else {
+                            counter.textContent = target.toLocaleString('en-IN');
+                        }
+                    }
+                };
+                
+                // Start animation with delay for staggered effect
+                setTimeout(updateCounter, 500);
+            });
+        }
+
+        // Initialize charts with real data
+        function initializeCharts() {
+            // Payment Chart
+            const paymentCtx = document.getElementById('paymentChart');
+            if (paymentCtx) {
+                const paymentData = {{ payment_chart_data|safe }};
+                new Chart(paymentCtx, {
+                    type: 'line',
+                    data: {
+                        labels: paymentData.map(item => item.date),
+                        datasets: [{
+                            label: 'Payments (₹)',
+                            data: paymentData.map(item => item.amount),
+                            borderColor: '#4facfe',
+                            backgroundColor: 'rgba(79, 172, 254, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#4facfe',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#666' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#666' }
+                            }
+                        },
+                        elements: {
+                            point: {
+                                hoverBackgroundColor: '#4facfe'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Word Count Chart
+            const wordCtx = document.getElementById('wordChart');
+            if (wordCtx) {
+                const wordData = {{ word_chart_data|safe }};
+                new Chart(wordCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: wordData.map(item => item.date),
+                        datasets: [{
+                            label: 'Words',
+                            data: wordData.map(item => item.words),
+                            backgroundColor: 'rgba(67, 233, 123, 0.8)',
+                            borderColor: '#43e97b',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#666' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#666' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Status Distribution Chart
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx) {
+                const statusData = {{ status_distribution|safe }};
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pending', 'In Progress', 'Completed'],
+                        datasets: [{
+                            data: [statusData.pending, statusData.in_progress, statusData.completed],
+                            backgroundColor: [
+                                '#ffc107',
+                                '#0dcaf0', 
+                                '#198754'
+                            ],
+                            borderWidth: 3,
+                            borderColor: 'rgba(26, 26, 26, 0.9)',
+                            hoverBorderWidth: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#666',
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+        }
+
+        // Activity filter functionality
+        function initializeActivityFilter() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const activityItems = document.querySelectorAll('.activity-item');
+
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    btn.classList.add('active');
+
+                    const filter = btn.getAttribute('data-filter');
+                    
+                    activityItems.forEach(item => {
+                        if (filter === 'all') {
+                            item.style.display = 'flex';
+                        } else if (filter === 'tasks' && item.classList.contains('task-activity')) {
+                            item.style.display = 'flex';
+                        } else if (filter === 'payments' && item.classList.contains('payment-activity')) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        }
+
+        // Expert items animation with delay
+        function animateExpertItems() {
+            const expertItems = document.querySelectorAll('.expert-item[data-delay]');
+            expertItems.forEach(item => {
+                const delay = parseInt(item.getAttribute('data-delay')) * 100;
+                setTimeout(() => {
+                    item.style.animationDelay = delay + 'ms';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateX(0)';
+                }, delay);
+            });
+        }
+
+        // Calendar tasks animation
+        function animateCalendarTasks() {
+            const calendarTasks = document.querySelectorAll('.calendar-task[data-delay]');
+            calendarTasks.forEach(task => {
+                const delay = parseInt(task.getAttribute('data-delay')) * 150;
+                setTimeout(() => {
+                    task.style.animationDelay = delay + 'ms';
+                    task.style.opacity = '1';
+                    task.style.transform = 'translateY(0)';
+                }, delay);
+            });
+        }
+
+        // Real-time updates (simulate)
+        function simulateRealTimeUpdates() {
+            setInterval(() => {
+                // Add subtle pulse animation to active metrics
+                const ongoingCard = document.querySelector('[data-metric="ongoing"]');
+                if (ongoingCard) {
+                    ongoingCard.style.animation = 'pulse 1s ease-in-out';
+                    setTimeout(() => {
+                        ongoingCard.style.animation = '';
+                    }, 1000);
+                }
+            }, 30000); // Every 30 seconds
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delay animations for better effect
+            setTimeout(animateCounters, 500);
+            setTimeout(initializeCharts, 1000);
+            setTimeout(animateExpertItems, 1500);
+            setTimeout(animateCalendarTasks, 2000);
+            
+            initializeActivityFilter();
+            simulateRealTimeUpdates();
+        });        // Enhanced mobile interactions
+        function addMobileEnhancements() {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // Add touch feedback for metric cards
+                const metricCards = document.querySelectorAll('.metric-card');
+                metricCards.forEach(card => {
+                    card.addEventListener('touchstart', function(e) {
+                        this.style.transform = 'scale(0.98)';
+                        this.style.transition = 'transform 0.1s ease';
+                    });
+                    
+                    card.addEventListener('touchend', function(e) {
+                        setTimeout(() => {
+                            this.style.transform = '';
+                            this.style.transition = '';
+                        }, 100);
+                    });
+                });
+
+                // Enhanced chart touch interactions
+                const chartCards = document.querySelectorAll('.chart-card');
+                chartCards.forEach(card => {
+                    card.addEventListener('touchstart', function(e) {
+                        this.style.transform = 'scale(0.99)';
+                    });
+                    
+                    card.addEventListener('touchend', function(e) {
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 150);
+                    });
+                });
+
+                // Swipe gesture detection for charts
+                let startX = null;
+                let startY = null;
+                const chartsGrid = document.querySelector('.charts-grid');
+                
+
+                if (chartsGrid) {
+                    chartsGrid.addEventListener('touchstart', function(e) {
+                        startX = e.touches[0].clientX;
+                        startY = e.touches[0].clientY;
+                    });
+                    
+                    chartsGrid.addEventListener('touchmove', function(e) {
+                        if (!startX || !startY) return;
+                        
+                        // Prevent default only for horizontal swipes
+                        const diffX = Math.abs(e.touches[0].clientX - startX);
+                        const diffY = Math.abs(e.touches[0].clientY - startY);
+                        
+                        if (diffX > diffY) {
+                            e.preventDefault();
+                        }
+                    });
+                    
+                    chartsGrid.addEventListener('touchend', function(e) {
+                        if (!startX || !startY) return;
+                        
+                        const endX = e.changedTouches[0].clientX;
+                        const endY = e.changedTouches[0].clientY;
+                        const diffX = startX - endX;
+                        const diffY = Math.abs(startY - endY);
+                        
+                        // Only trigger swipe if horizontal movement is greater than vertical
+                        if (Math.abs(diffX) > 50 && diffY < 100) {
+                            if (diffX > 0) {
+                                console.log('Swiped left - could switch to next chart view');
+                            } else {
+                                console.log('Swiped right - could switch to previous chart view');
+                            }
+                        }
+                        
+                        startX = null;
+                        startY = null;
+                    });
+                }
+
+                // Mobile-optimized activity filter
+                const filterButtons = document.querySelectorAll('.filter-btn');
+                filterButtons.forEach(btn => {
+                    btn.style.minHeight = '44px';
+                    btn.style.padding = '0.5rem 0.75rem';
+                });
+
+                // Smooth scrolling for activity lists
+                const activityList = document.querySelector('.activity-list');
+                const expertPayments = document.querySelector('.expert-payments');
+                const miniCalendar = document.querySelector('.mini-calendar');
+                
+                [activityList, expertPayments, miniCalendar].forEach(element => {
+                    if (element) {
+                        element.style.scrollBehavior = 'smooth';
+                        element.style.webkitOverflowScrolling = 'touch';
+                    }
+                });
+
+                // Touch-friendly expert items
+                const expertItems = document.querySelectorAll('.expert-item');
+                expertItems.forEach(item => {
+                    item.addEventListener('touchstart', function() {
+                        this.style.backgroundColor = 'var(--border-color)';
+                    });
+                    
+                    item.addEventListener('touchend', function() {
+                        setTimeout(() => {
+                            this.style.backgroundColor = '';
+                        }, 200);
+                    });
+                });
+
+                // Touch-friendly calendar tasks
+                const calendarTasks = document.querySelectorAll('.calendar-task');
+                calendarTasks.forEach(task => {
+                    task.addEventListener('touchstart', function() {
+                        this.style.transform = 'translateY(-1px)';
+                        this.style.boxShadow = '0 3px 10px var(--shadow)';
+                    });
+                    
+                    task.addEventListener('touchend', function() {
+                        setTimeout(() => {
+                            this.style.transform = '';
+                            this.style.boxShadow = '';
+                        }, 200);
+                    });
+                });
+
+                // Optimize number counters for mobile
+                const metricValues = document.querySelectorAll('.metric-value');
+                metricValues.forEach(value => {
+                    // Reduce font size on very small screens
+                    if (window.innerWidth <= 480) {
+                        value.style.fontSize = '1.5rem';
+                    }
+                });
+
+                // Mobile-specific stat items
+                const statItems = document.querySelectorAll('.stat-item');
+                statItems.forEach(item => {
+                    item.addEventListener('touchstart', function() {
+                        this.style.transform = 'scale(0.98)';
+                    });
+                    
+                    item.addEventListener('touchend', function() {
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 150);
+                    });
+                });
+
+                // Optimize chart legends for mobile
+                setTimeout(() => {
+                    const chartLegends = document.querySelectorAll('.chart-container canvas');
+                    chartLegends.forEach(canvas => {
+                        canvas.style.maxWidth = '100%';
+                        canvas.style.height = 'auto';
+                    });
+                }, 1000);
+
+                // Add momentum scrolling to all scrollable elements
+                const scrollableElements = document.querySelectorAll('.activity-list, .expert-payments, .mini-calendar');
+                scrollableElements.forEach(element => {
+                    element.style.webkitOverflowScrolling = 'touch';
+                    element.style.overflowY = 'auto';
+                });
+
+            } else {
+                // Remove mobile-specific styles for desktop
+                const allCards = document.querySelectorAll('.metric-card, .chart-card, .feature-card');
+                allCards.forEach(card => {
+                    card.removeEventListener('touchstart', function() {});
+                    card.removeEventListener('touchend', function() {});
+                    card.style.transform = '';
+                    card.style.transition = '';
+                });
+            }
+        }
+
+        // Responsive breakpoint handler
+        function handleResponsiveBreakpoints() {
+            const width = window.innerWidth;
+            
+            // Adjust chart heights based on screen size
+            const chartContainers = document.querySelectorAll('.chart-container');
+            chartContainers.forEach(container => {
+                if (width <= 480) {
+                    container.style.height = '120px';
+                } else if (width <= 768) {
+                    container.style.height = '150px';
+                } else if (width <= 1200) {
+                    container.style.height = '180px';
+                } else {
+                    container.style.height = '200px';
+                }
+            });
+
+            // Adjust metric card layout
+            const metricCards = document.querySelectorAll('.metric-card');
+            metricCards.forEach(card => {
+                if (width <= 768) {
+                    card.style.display = 'flex';
+                    card.style.alignItems = 'center';
+                    card.style.gap = '1rem';
+                } else {
+                    card.style.display = 'block';
+                    card.style.alignItems = '';
+                    card.style.gap = '';
+                }
+            });
+
+            // Adjust navbar for very small screens
+            const navbar = document.querySelector('.navbar-content');
+            if (width <= 480) {
+                navbar.style.flexWrap = 'wrap';
+                navbar.style.gap = '0.5rem';
+            } else {
+                navbar.style.flexWrap = 'nowrap';
+                navbar.style.gap = '';
+            }
+
+            // Update grid layouts
+            const metricsGrid = document.querySelector('.metrics-grid');
+            const chartsGrid = document.querySelector('.charts-grid');
+            const featuresGrid = document.querySelector('.features-grid');
+
+            if (width <= 768) {
+                if (metricsGrid) metricsGrid.style.gridTemplateColumns = '1fr';
+                if (chartsGrid) chartsGrid.style.gridTemplateColumns = '1fr';
+                if (featuresGrid) featuresGrid.style.gridTemplateColumns = '1fr';
+            } else if (width <= 1200) {
+                if (metricsGrid) metricsGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                if (chartsGrid) chartsGrid.style.gridTemplateColumns = '1fr';
+                if (featuresGrid) featuresGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+            } else {
+                if (metricsGrid) metricsGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
+                if (chartsGrid) chartsGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(400px, 1fr))';
+                if (featuresGrid) featuresGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
+            }
+        }
+
+        // Debounced resize handler
+        let resizeTimeout;
+        function handleResize() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                handleMobileLayout();
+                addMobileEnhancements();
+                handleResponsiveBreakpoints();
+            }, 100);
+        }
+
+        // Enhanced initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial setup
+            handleMobileLayout();
+            addMobileEnhancements();
+            handleResponsiveBreakpoints();
+            
+            // Delay animations for better effect
+            setTimeout(animateCounters, 500);
+            setTimeout(initializeCharts, 1000);
+            setTimeout(animateExpertItems, 1500);
+            setTimeout(animateCalendarTasks, 2000);
+            
+            initializeActivityFilter();
+            simulateRealTimeUpdates();
+        });
+
+        // Event listeners
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                handleResize();
+            }, 100);
+        });
+
+        // Accessibility improvements
+        function addAccessibilityFeatures() {
+            // Add ARIA labels
+            const metricCards = document.querySelectorAll('.metric-card');
+            metricCards.forEach((card, index) => {
+                const metricType = card.getAttribute('data-metric');
+                card.setAttribute('role', 'button');
+                card.setAttribute('aria-label', `${metricType} metric card`);
+                card.setAttribute('tabindex', '0');
+            });
+            // Add keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    // Ensure focus is visible
+                    document.body.classList.add('keyboard-navigation');
+                }
+            });
+            document.addEventListener('mousedown', function() {
+                document.body.classList.remove('keyboard-navigation');
+            });
+        }
+
+        // Performance optimization
+        function optimizePerformance() {
+            // Use passive event listeners where appropriate
+            const scrollableElements = document.querySelectorAll('.activity-list, .expert-payments, .mini-calendar');
+            scrollableElements.forEach(element => {
+                element.addEventListener('scroll', function() {
+                    // Handle scroll events efficiently
+                }, { passive: true });
+            });
+            // Optimize chart rendering
+            if (window.Chart) {
+                Chart.defaults.animation.duration = window.innerWidth <= 768 ? 500 : 1000;
+                Chart.defaults.responsive = true;
+                Chart.defaults.maintainAspectRatio = false;
+            }
+        }
+
+        // Initialize all enhancements
+        setTimeout(() => {
+            addAccessibilityFeatures();
+            optimizePerformance();
+        }, 2000);
+    </script>
+
+    <!-- Include Chart.js for advanced charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard - Texvo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --accent-color: #007bff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .dashboard-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .role-badge {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #0056b3 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .manager-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .manager-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .manager-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .manager-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #007bff;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 250px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: white;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .menu-item i {
+            margin-right: 0.5rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+            transition: margin 0.3s ease;
+        }
+
+        .sidebar-toggle {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 2000;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .navbar {
+                left: 0;
+                padding: 1rem;
+            }
+
+            .manager-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .welcome-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .welcome-card h1 {
+                font-size: 1.5rem;
+            }
+
+            .manager-card {
+                padding: 1.25rem;
+            }
+
+            .manager-icon {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-content {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .user-info {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .welcome-card h1 {
+                font-size: 1.3rem;
+            }
+
+            .manager-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .manager-card p {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">TEXVO</div>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="#" class="menu-item active">
+                <i class="fas fa-tachometer-alt"></i>
+                <span class="menu-text">Dashboard</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-users-cog"></i>
+                <span class="menu-text">Team Management</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-project-diagram"></i>
+                <span class="menu-text">Projects</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                <span class="menu-text">Reports</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="menu-text">Schedule</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-clipboard-check"></i>
+                <span class="menu-text">Quality Control</span>
+            </a>
+        </nav>
+    </div>
+
+    <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <div class="navbar-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">Manager Panel</div>
+            </div>
+            <div class="user-info">
+                <span>Welcome, {{ user.username }}</span>
+                <a href="{% url 'accounts:logout' %}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content" id="mainContent">
+        <div class="welcome-card">
+            <h1><i class="fas fa-user-tie"></i> Manager Dashboard</h1>
+            <p>Management control panel for <strong>{{ user.username }}</strong></p>
+            <div class="role-badge">{{ user.get_role_display }}</div>
+        </div>
+
+        <div class="manager-grid">
+            <div class="manager-card">
+                <div class="manager-icon">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <h3>Team Management</h3>
+                <p>Manage team members and assign tasks.</p>
+            </div>
+
+            <div class="manager-card">
+                <div class="manager-icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h3>Project Overview</h3>
+                <p>Monitor project progress and milestones.</p>
+            </div>
+
+            <div class="manager-card">
+                <div class="manager-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Performance Reports</h3>
+                <p>View team performance and productivity metrics.</p>
+            </div>
+
+            <div class="manager-card">
+                <div class="manager-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3>Schedule Management</h3>
+                <p>Manage schedules and deadlines.</p>
+            </div>
+
+            <div class="manager-card">
+                <div class="manager-icon">
+                    <i class="fas fa-budget"></i>
+                </div>
+                <h3>Budget Overview</h3>
+                <p>Monitor project budgets and expenses.</p>
+            </div>
+
+            <div class="manager-card">
+                <div class="manager-icon">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <h3>Quality Control</h3>
+                <p>Review and approve deliverables.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Mobile responsiveness
+        function handleMobileLayout() {
+            const isMobile = window.innerWidth <= 768;
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            if (isMobile) {
+                mainContent.style.marginLeft = '0';
+            } else {
+                sidebar.classList.remove('mobile-open');
+                if (sidebar.style.display !== 'none') {
+                    mainContent.style.marginLeft = '260px';
+                }
+            }
+        }
+
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.toggle('mobile-open');
+            } else {
+                var sidebar = document.getElementById('sidebar');
+                var mainContent = document.getElementById('mainContent');
+                if (sidebar.style.display === 'none' || sidebar.style.display === '') {
+                    sidebar.style.display = 'block';
+                    mainContent.style.marginLeft = '260px';
+                } else {
+                    sidebar.style.display = 'none';
+                    mainContent.style.marginLeft = '0';
+                }
+            }
+        });
+
+        window.addEventListener('resize', handleMobileLayout);
+        handleMobileLayout();
+    </script>
+</body>
+</html>

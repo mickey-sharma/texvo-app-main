@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management - Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #dc3545;
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 60px;
+            --transition-speed: 0.3s;
+        }
+
+        /* Light Mode Variables */
+        [data-theme="light"] {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --table-header: #e9ecef;
+            --table-row-even: #f8f9fa;
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --bg-primary: #000000;
+            --bg-secondary: #1a1a1a;
+            --bg-glass: rgba(26, 26, 26, 0.9);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.5);
+            --table-header: #2a2a2a;
+            --table-row-even: #1f1f1f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: all var(--transition-speed) ease;
+        }
+
+        /* Include sidebar and navbar styles from admin dashboard */
+        .navbar {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            z-index: 1000;
+            transition: left var(--transition-speed) ease;
+        }
+
+        .navbar.sidebar-collapsed {
+            left: var(--sidebar-collapsed-width);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-color);
+            z-index: 1001;
+            transition: width var(--transition-speed) ease;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .menu-item.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .menu-item i {
+            min-width: 20px;
+            margin-right: 1rem;
+            text-align: center;
+        }
+
+        .menu-text {
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+        }
+
+        .sidebar.collapsed .sidebar-logo {
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 80px;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+            transition: margin-left var(--transition-speed) ease;
+        }
+
+        .main-content.sidebar-collapsed {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .page-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .filters-section {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .filter-input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .users-table-container {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table th {
+            background: var(--table-header);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .users-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .users-table tr:nth-child(even) {
+            background: var(--table-row-even);
+        }
+
+        .users-table tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .status-pending { background: #ffc107; color: #212529; }
+        .status-inprogress { background: #007bff; }
+        .status-completed { background: #28a745; }
+        .status-failed { background: #dc3545; }
+        .status-cancelled { background: #6c757d; }
+
+        .price-badge {
+            background: #28a745;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .attachment-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .attachment-link:hover {
+            text-decoration: underline;
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-delete {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }        .btn-allocation {
+            background: #6f42c1;
+            color: white;
+            position: relative;
+        }
+
+        .btn-allocation.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn-allocation .loading-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .btn-allocation.loading .loading-spinner {
+            display: inline-block;
+        }
+
+        .btn-allocation.loading .fa-user-plus {
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        .pagination a, .pagination span {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .pagination a:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .pagination .current {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                left: 0;
+                padding: 1rem;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 2000;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .users-table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .users-table {
+                min-width: 700px;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            .action-btn {
+                padding: 0.4rem;
+                margin-right: 0.25rem;
+            }
+
+            .page-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .filters-section {
+                padding: 1rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 95vh;
+                margin: 0.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+
+            .filter-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .status-badge,
+            .price-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.5rem;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                padding: 0.5rem;
+            }
+
+            .pagination a,
+            .pagination span {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-content {
+                flex-wrap: wrap;
+            }
+
+            .navbar-right {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 0.4rem;
+                font-size: 0.8rem;
+            }
+
+            .action-btn {
+                padding: 0.3rem;
+                margin-right: 0.2rem;
+            }
+
+            .action-btn i {
+                font-size: 0.8rem;
+            }
+
+            .modal-content {
+                border-radius: 10px;
+            }
+
+            .page-header div:first-child {
+                text-align: center;
+            }
+
+            .page-header div:first-child h1 {
+                font-size: 1.3rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .page-header div:first-child p {
+                font-size: 0.9rem;
+            }
+
+            .filter-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .toast {
+                right: 10px;
+                left: 10px;
+                top: 80px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .action-btn {
+                min-width: 44px;
+                min-height: 44px;
+            }
+
+            .sidebar-toggle,
+            .theme-toggle {
+                min-width: 44px;
+                min-height: 44px;
+            }
+
+            .menu-item {
+                min-height: 48px;
+            }
+
+            .filter-btn {
+                min-height: 48px;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px var(--shadow);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color var(--transition-speed) ease;
+        }
+
+        .close-modal:hover {
+            color: var(--accent-color);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .detail-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .detail-value {
+            color: var(--text-secondary);
+        }
+
+        /* Toast Styles */
+        .toast {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            z-index: 3000;
+            box-shadow: 0 10px 30px var(--shadow);
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            border-left: 4px solid #28a745;
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Searchable Select Styles */
+        .searchable-select {
+            position: relative;
+        }
+
+        .select-search-container {
+            position: relative;
+        }
+
+        .select-search-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .select-search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .select-option {
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: background var(--transition-speed) ease;
+        }
+
+        .select-option:hover {
+            background: var(--bg-glass);
+        }
+
+        .select-option.selected {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .file-preview {
+            display: inline-block;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin: 0.25rem;
+            font-size: 0.8rem;
+        }
+
+        .file-remove {
+            margin-left: 0.5rem;
+            color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        // Handle mobile responsiveness
+        function handleMobileLayout() {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                sidebar.classList.remove('collapsed');
+                navbar.classList.remove('sidebar-collapsed');
+                mainContent.classList.remove('sidebar-collapsed');
+            } else {
+                sidebar.classList.remove('mobile-open');
+            }
+        }
+
+        // Update sidebar toggle for mobile
+        sidebarToggle.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                navbar.classList.toggle('sidebar-collapsed');
+                mainContent.classList.toggle('sidebar-collapsed');
+                
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            handleMobileLayout();
+        });
+
+        // Initialize mobile layout
+        handleMobileLayout();
+
+        // Close mobile sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !sidebarToggle.contains(e.target) &&
+                sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">TEXVO</div>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="{% url 'accounts:admin_dashboard' %}" class="menu-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span class="menu-text">Dashboard</span>
+            </a>
+            <a href="{% url 'accounts:user_management' %}" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span class="menu-text">User Management</span>
+            </a>
+            <a href="{% url 'accounts:task_management' %}" class="menu-item active">
+                <i class="fas fa-tasks"></i>
+                <span class="menu-text">Tasks</span>
+            </a>            <a href="{% url 'accounts:invoice_management' %}" class="menu-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span class="menu-text">Invoices</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-database"></i>
+                <span class="menu-text">Calender</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-shield-alt"></i>
+                <span class="menu-text">Security</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-tools"></i>
+                <span class="menu-text">Maintenance</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-bell"></i>
+                <span class="menu-text">Notifications</span>
+            </a>
+        </nav>
+    </div>
+
+    <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <div class="navbar-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">Task Management</div>
+            </div>
+            <div class="navbar-right">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-info">
+                    <span>{{ user.username }}</span>
+                </div>
+                <a href="{% url 'accounts:logout' %}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content" id="mainContent">
+        <div class="page-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1><i class="fas fa-tasks"></i> Task Management</h1>
+                    <p>Manage all project tasks and assignments</p>
+                </div>
+                <button class="filter-btn" onclick="createTask()" style="background: #28a745;">
+                    <i class="fas fa-plus"></i>
+                    Add New Task
+                </button>
+            </div>
+            <div style="margin-top: 1rem;">
+                <span class="status-badge status-pending">Total Tasks: {{ total_tasks }}</span>
+            </div>
+        </div>
+
+        <div class="filters-section">
+            <form method="GET" class="filters-grid">
+                <div class="filter-group">
+                    <label for="search">Search Tasks</label>
+                    <input type="text" id="search" name="search" value="{{ search_query }}" 
+                           placeholder="Search by code, module, notes..." class="filter-input">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="status">Filter by Status</label>
+                    <select id="status" name="status" class="filter-input">
+                        <option value="">All Status</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="allocation">Filter by Expert</label>
+                    <select id="allocation" name="allocation" class="filter-input">
+                        <option value="">All Experts</option>
+                        <option value="unassigned" {% if allocation_filter == 'unassigned' %}selected{% endif %}>Unassigned</option>
+                        {% for expert in experts %}
+                            <option value="{{ expert.id }}" {% if allocation_filter == expert.id|stringformat:"s" %}selected{% endif %}>
+                                {{ expert.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <button type="submit" class="filter-btn">
+                        <i class="fas fa-search"></i>
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="users-table-container">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Task Code</th>
+                        <th>Module</th>
+                        <th>Words</th>
+                        <th>Price</th>
+                        <th>Expert</th>
+                        <th>Status</th>
+                        <th>Deadline</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600; color: var(--accent-color);">{{ task.task_code }}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">{{ task.module_code }}</div>
+                        </td>                        <td>
+                            <div style="font-weight: 600; color: var(--text-primary);">{{ task.client.first_name }} {{ task.client.last_name }}</div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.2rem;">{{ task.module_name }}</div>
+                            {% if task.attachments %}
+                                <div style="margin-top: 0.5rem;">
+                                    <a href="{{ task.attachments.url }}" target="_blank" class="attachment-link">
+                                        <i class="fas fa-paperclip"></i> {{ task.attachment_name }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div>{{ task.word_count }}</div>
+                            {% if task.additional_words %}
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">+{{ task.additional_words }} additional</div>
+                            {% endif %}
+                        </td>                        <td>
+                            <span class="price-badge">{{ task.formatted_price }}</span>
+                        </td>
+                        <td>
+                            {% if task.allocation %}
+                                <div style="font-weight: 600;">{{ task.allocation.username }}</div>
+                            {% else %}
+                                <span style="color: var(--text-secondary);">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ task.status|lower }}">
+                                {{ task.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div>{{ task.deadline|date:"M d, Y" }}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">{{ task.deadline|date:"H:i" }}</div>
+                        </td>                        <td>
+                            <button class="action-btn btn-view" title="View Details" onclick="viewTask({{ task.id }})">
+                                <i class="fas fa-eye"></i>
+                            </button>                            {% if not task.allocation %}
+                            <button class="action-btn btn-allocation" title="Quick Allocate" onclick="quickAllocate({{ task.id }}, '{{ task.task_code }}')" id="allocateBtn{{ task.id }}">
+                                <i class="fas fa-user-plus"></i>
+                                <div class="loading-spinner"></div>
+                            </button>
+                            {% endif %}
+                            <button class="action-btn btn-edit" title="Edit Task" onclick="editTask({{ task.id }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn btn-delete" title="Delete Task" onclick="deleteTask({{ task.id }}, '{{ task.task_code }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                            <i class="fas fa-tasks" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                            No tasks found matching your criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if tasks.has_other_pages %}
+        <div class="pagination">
+            {% if tasks.has_previous %}
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if allocation_filter %}&allocation={{ allocation_filter }}{% endif %}">&laquo; First</a>
+                <a href="?page={{ tasks.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if allocation_filter %}&allocation={{ allocation_filter }}{% endif %}">&lsaquo; Previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ tasks.number }} of {{ tasks.paginator.num_pages }}
+            </span>
+
+            {% if tasks.has_next %}
+                <a href="?page={{ tasks.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if allocation_filter %}&allocation={{ allocation_filter }}{% endif %}">Next &rsaquo;</a>
+                <a href="?page={{ tasks.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if allocation_filter %}&allocation={{ allocation_filter }}{% endif %}">Last &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Task Create Modal -->
+        <div id="taskCreateModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-plus"></i> Create New Task</h2>
+                    <span class="close-modal" onclick="closeModal('taskCreateModal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="createTaskForm" enctype="multipart/form-data">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Client: <span style="color: var(--accent-color);">*</span></label>
+                                <select name="client" class="form-input searchable-select" required id="clientSelect">
+                                    <option value="">Select Client</option>
+                                    {% for client in clients %}
+                                        <option value="{{ client.id }}">{{ client.username }} - {{ client.first_name }} {{ client.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Module Code: <span style="color: var(--accent-color);">*</span></label>
+                                <input type="text" name="module_code" class="form-input" required placeholder="Enter module code">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Module Name: <span style="color: var(--accent-color);">*</span></label>
+                                <input type="text" name="module_name" class="form-input" required placeholder="Enter module name">
+                            </div>
+                            <div class="form-group">
+                                <label>Word Count: <span style="color: var(--accent-color);">*</span></label>
+                                <input type="number" name="word_count" class="form-input" required placeholder="Enter word count" min="1" step="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Additional Words:</label>
+                                <input type="number" name="additional_words" class="form-input" placeholder="Enter additional words" min="0" value="0" step="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Deadline: <span style="color: var(--accent-color);">*</span></label>
+                                <input type="datetime-local" name="deadline" class="form-input" required>
+                            </div>                            <div class="form-group">
+                                <label>Quoted Price: <span style="color: var(--accent-color);">*</span></label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <select name="currency" class="form-input" style="flex: 0 0 100px;">
+                                        {% for value, label in currency_choices %}
+                                            <option value="{{ value }}" {% if value == 'INR' %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <input type="number" name="quoted_price" class="form-input" required placeholder="Enter price" min="0" step="0.01" style="flex: 1;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Assign to Expert:</label>
+                                <select name="allocation" class="form-input searchable-select" id="expertSelect">
+                                    <option value="">Select Expert (Optional)</option>
+                                    {% for expert in experts %}
+                                        <option value="{{ expert.id }}">{{ expert.username }} - {{ expert.first_name }} {{ expert.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Status:</label>
+                                <select name="status" class="form-input">
+                                    {% for value, label in status_choices %}
+                                        <option value="{{ value }}" {% if value == 'Pending' %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Notes:</label>
+                                <textarea name="notes" class="form-input" rows="3" placeholder="Enter any additional notes..."></textarea>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Attachments:</label>
+                                <input type="file" name="attachments" class="form-input" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.zip,.rar" multiple>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                    <i class="fas fa-info-circle"></i>
+                                    Maximum file size per file: 25MB. Multiple files allowed. Supported formats: PDF, DOC, DOCX, TXT, JPG, PNG, ZIP, RAR
+                                </div>
+                                <div id="selectedFiles" style="margin-top: 0.5rem;"></div>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="filter-btn" onclick="closeModal('taskCreateModal')">Cancel</button>
+                            <button type="submit" class="filter-btn" style="background: #28a745;">Create Task</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Detail Modal -->
+        <div id="taskDetailModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-info-circle"></i> Task Details</h2>
+                    <span class="close-modal" onclick="closeModal('taskDetailModal')">&times;</span>
+                </div>
+                <div class="modal-body" id="taskDetailContent">
+                    <!-- Task details will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Edit Modal -->
+        <div id="taskEditModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-edit"></i> Edit Task</h2>
+                    <span class="close-modal" onclick="closeModal('taskEditModal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="editTaskForm" enctype="multipart/form-data">
+                        <div id="taskEditContent">
+                            <!-- Edit form will be loaded here -->
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="filter-btn" onclick="closeModal('taskEditModal')">Cancel</button>
+                            <button type="submit" class="filter-btn" style="background: #28a745;">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Allocation Modal -->
+        <div id="quickAllocationModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h2><i class="fas fa-user-plus"></i> Quick Allocate Expert</h2>
+                    <span class="close-modal" onclick="closeModal('quickAllocationModal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="quickAllocationForm">
+                        <input type="hidden" id="quickTaskId" name="task_id">
+                        <div class="form-group">
+                            <label>Task Code:</label>
+                            <input type="text" id="quickTaskCode" class="form-input" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Select Expert: <span style="color: var(--accent-color);">*</span></label>
+                            <select name="allocation" class="form-input searchable-select" id="quickExpertSelect" required>
+                                <option value="">Select Expert</option>
+                                {% for expert in experts %}
+                                    <option value="{{ expert.id }}">{{ expert.username }} - {{ expert.first_name }} {{ expert.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 8px; padding: 15px; margin: 15px 0;">
+                            <p style="margin: 0; color: var(--text-primary); font-size: 0.9rem;">
+                                <i class="fas fa-info-circle"></i>
+                                The expert will be notified via email and the task status will be set to "In Progress".
+                            </p>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="filter-btn" onclick="closeModal('quickAllocationModal')">Cancel</button>
+                            <button type="submit" class="filter-btn" style="background: #6f42c1;">Allocate Expert</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Toast -->
+        <div id="toast" class="toast" style="display: none;">
+            <div id="toastMessage"></div>
+        </div>
+
+        <script>
+            // Theme Toggle
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const themeIcon = themeToggle.querySelector('i');
+
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            body.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+
+            function updateThemeIcon(theme) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+
+            // Sidebar Toggle
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const navbar = document.getElementById('navbar');
+            const mainContent = document.getElementById('mainContent');
+
+            sidebarToggle.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('mobile-open');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    navbar.classList.toggle('sidebar-collapsed');
+                    mainContent.classList.toggle('sidebar-collapsed');
+                    
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
+                }
+            });
+
+            // Handle mobile responsiveness
+            function handleMobileLayout() {
+                const isMobile = window.innerWidth <= 768;
+                
+                if (isMobile) {
+                    sidebar.classList.remove('collapsed');
+                    navbar.classList.remove('sidebar-collapsed');
+                    mainContent.classList.remove('sidebar-collapsed');
+                } else {
+                    sidebar.classList.remove('mobile-open');
+                }
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                handleMobileLayout();
+            });
+
+            // Initialize mobile layout
+            handleMobileLayout();
+
+            // Close mobile sidebar when clicking outside
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    !sidebar.contains(e.target) && 
+                    !sidebarToggle.contains(e.target) &&
+                    sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+
+            // Searchable Select Implementation
+            function initSearchableSelect(selectId, searchPlaceholder) {
+                const select = document.getElementById(selectId);
+                if (!select) return;
+
+                const container = document.createElement('div');
+                container.className = 'select-search-container';
+                
+                const searchInput = document.createElement('input');
+                searchInput.type = 'text';
+                searchInput.className = 'select-search-input';
+                searchInput.placeholder = searchPlaceholder;
+                
+                const dropdown = document.createElement('div');
+                dropdown.className = 'select-dropdown';
+                
+                // Store original options
+                const options = Array.from(select.options).map(option => ({
+                    value: option.value,
+                    text: option.text,
+                    selected: option.selected
+                }));
+                
+                // Replace select with searchable input
+                select.style.display = 'none';
+                select.parentNode.insertBefore(container, select);
+                container.appendChild(searchInput);
+                container.appendChild(dropdown);
+                container.appendChild(select);
+                
+                let selectedValue = '';
+                
+                function updateDropdown(filter = '') {
+                    dropdown.innerHTML = '';
+                    
+                    const filteredOptions = options.filter(option => 
+                        option.text.toLowerCase().includes(filter.toLowerCase()) || option.value === ''
+                    );
+                    
+                    filteredOptions.forEach(option => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'select-option';
+                        optionDiv.textContent = option.text;
+                        optionDiv.dataset.value = option.value;
+                        
+                        if (option.value === selectedValue) {
+                            optionDiv.classList.add('selected');
+                        }
+                        
+                        optionDiv.addEventListener('click', () => {
+                            selectedValue = option.value;
+                            searchInput.value = option.text;
+                            select.value = option.value;
+                            dropdown.style.display = 'none';
+                            
+                            // Update visual selection
+                            dropdown.querySelectorAll('.select-option').forEach(opt => {
+                                opt.classList.remove('selected');
+                            });
+                            optionDiv.classList.add('selected');
+                        });
+                        
+                        dropdown.appendChild(optionDiv);
+                    });
+                }
+                
+                searchInput.addEventListener('input', (e) => {
+                    updateDropdown(e.target.value);
+                    dropdown.style.display = 'block';
+                });
+                
+                searchInput.addEventListener('focus', () => {
+                    updateDropdown(searchInput.value);
+                    dropdown.style.display = 'block';
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!container.contains(e.target)) {
+                        dropdown.style.display = 'none';
+                    }
+                });
+                
+                // Initialize
+                updateDropdown();
+            }
+
+            // File upload preview
+            function initFileUpload() {
+                const fileInput = document.querySelector('input[name="attachments"]');
+                const selectedFilesDiv = document.getElementById('selectedFiles');
+                
+                if (!fileInput || !selectedFilesDiv) return;
+                
+                fileInput.addEventListener('change', function() {
+                    selectedFilesDiv.innerHTML = '';
+                    
+                    Array.from(this.files).forEach((file, index) => {
+                        const fileDiv = document.createElement('div');
+                        fileDiv.className = 'file-preview';
+                        fileDiv.innerHTML = `
+                            <i class="fas fa-file"></i> ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)
+                            <span class="file-remove" onclick="removeFile(${index})">&times;</span>
+                        `;
+                        selectedFilesDiv.appendChild(fileDiv);
+                    });
+                });
+            }
+
+            function removeFile(index) {
+                const fileInput = document.querySelector('input[name="attachments"]');
+                const dt = new DataTransfer();
+                
+                Array.from(fileInput.files).forEach((file, i) => {
+                    if (i !== index) {
+                        dt.items.add(file);
+                    }
+                });
+                
+                fileInput.files = dt.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+
+            // Task Management Functions
+            function createTask() {
+                document.getElementById('taskCreateModal').style.display = 'flex';
+                
+                // Initialize searchable selects after modal is shown
+                setTimeout(() => {
+                    // initSearchableSelect('clientSelect', 'Search clients...');
+                    initSearchableSelect('expertSelect', 'Search experts...');
+                    initFileUpload();
+                }, 100);
+            }
+
+            function viewTask(taskId) {
+                fetch(`/accounts/admin/tasks/${taskId}/view/`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    let attachmentsHtml = '';
+                    if (data.attachments && data.attachments.length > 0) {
+                        attachmentsHtml = `
+                            <div class="detail-item" style="grid-column: 1 / -1;">
+                                <span class="detail-label">Attachments (${data.attachment_count}):</span>
+                                <div class="detail-value">
+                                    ${data.attachments.map(attachment => `
+                                        <div style="margin: 0.5rem 0; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border-color);">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <div>
+                                                    <a href="${attachment.file_url}" target="_blank" style="color: var(--accent-color); text-decoration: none;">
+                                                        <i class="fas fa-paperclip"></i> ${attachment.file_name}
+                                                    </a>
+                                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                                        ${attachment.file_size_mb} MB • Uploaded: ${attachment.uploaded_at}
+                                                    </div>
+                                                </div>
+                                                <a href="${attachment.file_url}" download class="action-btn btn-view" style="margin: 0;">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    document.getElementById('taskDetailContent').innerHTML = `
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Task Code:</span>
+                                <span class="detail-value">${data.task_code}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Client:</span>
+                                <span class="detail-value">${data.client} - ${data.client_name}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Module Code:</span>
+                                <span class="detail-value">${data.module_code}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Module Name:</span>
+                                <span class="detail-value">${data.module_name}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Word Count:</span>
+                                <span class="detail-value">${data.word_count}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Additional Words:</span>
+                                <span class="detail-value">${data.additional_words}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Deadline:</span>
+                                <span class="detail-value">${data.deadline}</span>
+                            </div>                            <div class="detail-item">
+                                <span class="detail-label">Quoted Price:</span>
+                                <span class="detail-value">${data.formatted_price}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Expert:</span>
+                                <span class="detail-value">${data.allocation} - ${data.allocation_name}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Status:</span>
+                                <span class="detail-value">${data.status}</span>
+                            </div>
+                            <div class="detail-item" style="grid-column: 1 / -1;">
+                                <span class="detail-label">Notes:</span>
+                                <span class="detail-value">${data.notes || 'No notes'}</span>
+                            </div>
+                            ${attachmentsHtml}
+                            <div class="detail-item">
+                                <span class="detail-label">Created By:</span>
+                                <span class="detail-value">${data.created_by}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Created At:</span>
+                                <span class="detail-value">${data.created_at}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Updated At:</span>
+                                <span class="detail-value">${data.updated_at}</span>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('taskDetailModal').style.display = 'flex';
+                })
+                .catch(error => {
+                    showToast('Error loading task details', 'error');
+                });
+            }
+
+            function editTask(taskId) {
+                fetch(`/accounts/admin/tasks/${taskId}/edit/`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const expertOptions = data.experts.map(expert => 
+                        `<option value="${expert.id}" ${expert.id === data.allocation_id ? 'selected' : ''}>${expert.username} - ${expert.name}</option>`
+                    ).join('');                    const statusOptions = data.status_choices.map(choice => 
+                        `<option value="${choice[0]}" ${choice[0] === data.status ? 'selected' : ''}>${choice[1]}</option>`
+                    ).join('');
+
+                    const currencyOptions = [
+                        {value: 'INR', label: '₹ INR'},
+                        {value: 'USD', label: '$ USD'},
+                        {value: 'EUR', label: '€ EUR'},
+                        {value: 'GBP', label: '£ GBP'}
+                    ].map(currency => 
+                        `<option value="${currency.value}" ${currency.value === data.currency ? 'selected' : ''}>${currency.label}</option>`
+                    ).join('');
+
+                    let existingAttachmentsHtml = '';
+                    if (data.attachments && data.attachments.length > 0) {
+                        existingAttachmentsHtml = `
+                            <div style="margin-bottom: 1rem;">
+                                <label style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; display: block;">Existing Attachments:</label>
+                                <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;">
+                                    ${data.attachments.map(attachment => `
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; margin: 0.5rem 0; background: var(--bg-glass); border-radius: 6px; border: 1px solid var(--border-color);">
+                                            <div>
+                                                <a href="${attachment.file_url}" target="_blank" style="color: var(--accent-color); text-decoration: none;">
+                                                    <i class="fas fa-paperclip"></i> ${attachment.file_name}
+                                                </a>
+                                                <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                                    ${attachment.file_size_mb} MB • ${attachment.uploaded_at}
+                                                </div>
+                                            </div>
+                                            <button type="button" class="action-btn btn-delete" onclick="deleteAttachment(${attachment.id})" title="Delete Attachment">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    document.getElementById('taskEditContent').innerHTML = `
+                        <input type="hidden" name="task_id" value="${data.id}">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Task Code:</label>
+                                <input type="text" value="${data.task_code}" class="form-input" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label>Module Code:</label>
+                                <input type="text" name="module_code" value="${data.module_code}" class="form-input" required>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Module Name:</label>
+                                <input type="text" name="module_name" value="${data.module_name}" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Word Count:</label>
+                                <input type="number" name="word_count" value="${data.word_count}" class="form-input" required min="1" step="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Additional Words:</label>
+                                <input type="number" name="additional_words" value="${data.additional_words}" class="form-input" min="0" step="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Deadline:</label>
+                                <input type="datetime-local" name="deadline" value="${data.deadline}" class="form-input" required>
+                            </div>                            <div class="form-group">
+                                <label>Quoted Price:</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <select name="currency" class="form-input" style="flex: 0 0 100px;">
+                                        ${currencyOptions}
+                                    </select>
+                                    <input type="number" name="quoted_price" value="${data.quoted_price}" class="form-input" required min="0" step="0.01" style="flex: 1;">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Assign to Expert:</label>
+                                <select name="allocation" class="form-input searchable-select" id="editExpertSelect">
+                                    <option value="">Select Expert (Optional)</option>
+                                    ${expertOptions}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Status:</label>
+                                <select name="status" class="form-input">
+                                    ${statusOptions}
+                                </select>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Notes:</label>
+                                <textarea name="notes" class="form-input" rows="3">${data.notes || ''}</textarea>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                ${existingAttachmentsHtml}
+                                <label>Add New Attachments:</label>
+                                <input type="file" name="attachments" class="form-input" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.zip,.rar" multiple>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                    <i class="fas fa-info-circle"></i>
+                                    Maximum file size per file: 25MB. Multiple files allowed.
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Initialize searchable select for expert dropdown
+                    setTimeout(() => {
+                        initSearchableSelect('editExpertSelect', 'Search experts...');
+                    }, 100);
+                    
+                    document.getElementById('taskEditModal').style.display = 'flex';
+                })
+                .catch(error => {
+                    showToast('Error loading task data', 'error');
+                });
+            }
+
+            function quickAllocate(taskId, taskCode) {
+                document.getElementById('quickTaskId').value = taskId;
+                document.getElementById('quickTaskCode').value = taskCode;
+                document.getElementById('quickExpertSelect').value = '';
+                document.getElementById('quickAllocationModal').style.display = 'flex';
+                
+                // Initialize searchable select for expert dropdown
+                setTimeout(() => {
+                    initSearchableSelect('quickExpertSelect', 'Search experts...');
+                }, 100);
+            }
+
+            // Get CSRF token from cookie or meta tag
+            function getCsrfToken() {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, 10) === ('csrftoken=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(10));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            // Form submission for creating task
+            document.getElementById('createTaskForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                
+                fetch('/accounts/admin/tasks/create/', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        closeModal('taskCreateModal');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error creating task', 'error');
+                });
+            });
+
+            // Form submission for editing task
+            document.getElementById('editTaskForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const taskId = formData.get('task_id');
+                
+                if (!taskId) {
+                    showToast('Task ID not found', 'error');
+                    return;
+                }
+                
+                fetch(`/accounts/admin/tasks/${taskId}/edit/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        closeModal('taskEditModal');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error updating task', 'error');
+                });
+            });            // Form submission for quick allocation
+            document.getElementById('quickAllocationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const taskId = formData.get('task_id');
+                const expertId = formData.get('allocation');
+                
+                if (!expertId) {
+                    showToast('Please select an expert', 'error');
+                    return;
+                }
+                
+                // Show loading on the submit button
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<div class="loading-spinner" style="display: inline-block; width: 16px; height: 16px; border: 2px solid transparent; border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px;"></div>Allocating...';
+                submitBtn.disabled = true;
+                
+                // Show loading on the page allocation button if it exists
+                const pageAllocateBtn = document.getElementById(`allocateBtn${taskId}`);
+                if (pageAllocateBtn) {
+                    pageAllocateBtn.classList.add('loading');
+                    pageAllocateBtn.disabled = true;
+                }
+                
+                // Create a complete form data for task update
+                const updateData = new FormData();
+                updateData.append('allocation', expertId);
+                updateData.append('status', 'InProgress'); // Set status to InProgress when allocating
+                
+                fetch(`/accounts/admin/tasks/${taskId}/edit/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: updateData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Reset button states
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    if (pageAllocateBtn) {
+                        pageAllocateBtn.classList.remove('loading');
+                        pageAllocateBtn.disabled = false;
+                    }
+                    
+                    if (data.success) {
+                        showToast('Expert allocated successfully! Email notification sent.', 'success');
+                        closeModal('quickAllocationModal');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Reset button states on error
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    if (pageAllocateBtn) {
+                        pageAllocateBtn.classList.remove('loading');
+                        pageAllocateBtn.disabled = false;
+                    }
+                    showToast('Error allocating expert', 'error');
+                });
+            });
+
+            function deleteTask(taskId, taskCode) {
+                if (confirm(`Are you sure you want to delete task "${taskCode}"? This action cannot be undone.`)) {
+                    fetch(`/accounts/admin/tasks/${taskId}/delete/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': getCsrfToken(),
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            showToast(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Error deleting task', 'error');
+                    });
+                }
+            }
+
+            function deleteAttachment(attachmentId) {
+                if (confirm('Are you sure you want to delete this attachment?')) {
+                    fetch(`/accounts/admin/attachments/${attachmentId}/delete/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': getCsrfToken(),
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            // Reload the edit modal to refresh attachment list
+                            setTimeout(() => {
+                                const taskId = document.querySelector('input[name="task_id"]').value;
+                                closeModal('taskEditModal');
+                                editTask(taskId);
+                            }, 1000);
+                        } else {
+                            showToast(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Error deleting attachment', 'error');
+                    });
+                }
+            }
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            });
+
+            // Close modal function
+            function closeModal(modalId) {
+                document.getElementById(modalId).style.display = 'none';
+            }
+
+            function showToast(message, type) {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toastMessage');
+                
+                toastMessage.textContent = message;
+                toast.className = `toast ${type}`;
+                toast.style.display = 'block';
+                
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            }
+
+            // Add close button event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                // Close button event listeners
+                document.querySelectorAll('.close-modal').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const modal = this.closest('.modal');
+                        if (modal) {
+                            modal.style.display = 'none';
+                        }
+                    });
+                });
+
+                // ESC key to close modals
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        document.querySelectorAll('.modal').forEach(modal => {
+                            modal.style.display = 'none';
+                        });
+                    }
+                });
+            });
+        </script>
+    </main>
+</body>
+</html>

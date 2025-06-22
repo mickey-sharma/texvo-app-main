@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #dc3545;
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 60px;
+            --transition-speed: 0.3s;
+        }
+
+        /* Light Mode Variables */
+        [data-theme="light"] {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --table-header: #e9ecef;
+            --table-row-even: #f8f9fa;
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --bg-primary: #000000;
+            --bg-secondary: #1a1a1a;
+            --bg-glass: rgba(26, 26, 26, 0.9);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.5);
+            --table-header: #2a2a2a;
+            --table-row-even: #1f1f1f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: all var(--transition-speed) ease;
+        }
+
+        /* Include sidebar and navbar styles from admin dashboard */
+        .navbar {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            z-index: 1000;
+            transition: left var(--transition-speed) ease;
+        }
+
+        .navbar.sidebar-collapsed {
+            left: var(--sidebar-collapsed-width);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-color);
+            z-index: 1001;
+            transition: width var(--transition-speed) ease;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .menu-item.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .menu-item i {
+            min-width: 20px;
+            margin-right: 1rem;
+            text-align: center;
+        }
+
+        .menu-text {
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+        }
+
+        .sidebar.collapsed .sidebar-logo {
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 80px;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+            transition: margin-left var(--transition-speed) ease;
+        }
+
+        .main-content.sidebar-collapsed {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .page-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .filters-section {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .filter-input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .users-table-container {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table th {
+            background: var(--table-header);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .users-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .users-table tr:nth-child(even) {
+            background: var(--table-row-even);
+        }
+
+        .users-table tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .role-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .role-admin {
+            background: var(--accent-color);
+        }
+
+        .role-manager {
+            background: #007bff;
+        }
+
+        .role-client {
+            background: #28a745;
+        }
+
+        .role-expert {
+            background: #6f42c1;
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-delete {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-password {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .btn-password:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .btn-password:disabled:hover {
+            transform: none;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        .pagination a, .pagination span {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .pagination a:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .pagination .current {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                left: 0;
+                padding: 1rem;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 2000;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .users-table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .users-table {
+                min-width: 600px;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            .action-btn {
+                padding: 0.4rem;
+                margin-right: 0.25rem;
+            }
+
+            .page-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 95vh;
+                margin: 0.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-content {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .navbar-right {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 0.4rem;
+                font-size: 0.8rem;
+            }
+
+            .action-btn {
+                padding: 0.3rem;
+                margin-right: 0.2rem;
+            }
+
+            .page-header div:first-child {
+                text-align: center;
+            }
+
+            .filter-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .toast {
+                right: 10px;
+                left: 10px;
+                top: 80px;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .action-btn {
+                min-width: 44px;
+                min-height: 44px;
+            }
+
+            .sidebar-toggle,
+            .theme-toggle {
+                min-width: 44px;
+                min-height: 44px;
+            }
+
+            .menu-item {
+                min-height: 48px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">TEXVO</div>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="{% url 'accounts:admin_dashboard' %}" class="menu-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span class="menu-text">Dashboard</span>
+            </a>
+            <a href="{% url 'accounts:user_management' %}" class="menu-item active">
+                <i class="fas fa-users"></i>
+                <span class="menu-text">User Management</span>
+            </a>
+            <a href="{% url 'accounts:task_management' %}" class="menu-item ">
+                <i class="fas fa-tasks"></i>
+                <span class="menu-text">Tasks</span>
+            </a>            <a href="{% url 'accounts:invoice_management' %}" class="menu-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span class="menu-text">Invoices</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-database"></i>
+                <span class="menu-text">Calender</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-shield-alt"></i>
+                <span class="menu-text">Security</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-tools"></i>
+                <span class="menu-text">Maintenance</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-bell"></i>
+                <span class="menu-text">Notifications</span>
+            </a>
+        </nav>
+    </div>
+
+    <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <div class="navbar-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">User Management</div>
+            </div>
+            <div class="navbar-right">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-info">
+                    <span>{{ user.username }}</span>
+                </div>
+                <a href="{% url 'accounts:logout' %}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content" id="mainContent">
+        <div class="page-header">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1><i class="fas fa-users"></i> User Management</h1>
+                    <p>Manage all user accounts, roles, and permissions</p>
+                </div>
+                <button class="filter-btn" onclick="createUser()" style="background: #28a745;">
+                    <i class="fas fa-plus"></i>
+                    Add New User
+                </button>
+            </div>
+            <div style="margin-top: 1rem;">
+                <span class="status-badge status-active">Total Users: {{ total_users }}</span>
+            </div>
+        </div>
+
+        <div class="filters-section">
+            <form method="GET" class="filters-grid">
+                <div class="filter-group">
+                    <label for="search">Search Users</label>
+                    <input type="text" id="search" name="search" value="{{ search_query }}" 
+                           placeholder="Search by name, username, email..." class="filter-input">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="role">Filter by Role</label>
+                    <select id="role" name="role" class="filter-input">
+                        <option value="">All Roles</option>
+                        {% for value, label in role_choices %}
+                            <option value="{{ value }}" {% if role_filter == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="status">Filter by Status</label>
+                    <select id="status" name="status" class="filter-input">
+                        <option value="">All Status</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <button type="submit" class="filter-btn">
+                        <i class="fas fa-search"></i>
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="users-table-container">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Last Login</th>
+                        <th>Date Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_obj in users %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-user-circle" style="font-size: 1.5rem; color: var(--accent-color);"></i>
+                                <div>
+                                    <div style="font-weight: 600;">{{ user_obj.username }}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                        {{ user_obj.first_name }} {{ user_obj.last_name }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ user_obj.email|default:"-" }}</td>
+                        <td>
+                            <span class="role-badge role-{{ user_obj.role }}">
+                                {{ user_obj.get_role_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge {% if user_obj.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                {% if user_obj.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            {% if user_obj.last_login %}
+                                {{ user_obj.last_login|date:"M d, Y H:i" }}
+                            {% else %}
+                                <span style="color: var(--text-secondary);">Never</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user_obj.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            <button class="action-btn btn-view" title="View Details" onclick="viewUser({{ user_obj.id }})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn btn-edit" title="Edit User" onclick="editUser({{ user_obj.id }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn btn-password" title="Send Password" onclick="sendPassword({{ user_obj.id }}, '{{ user_obj.username }}', '{{ user_obj.email|default:'' }}')" {% if not user_obj.email %}disabled{% endif %}>
+                                <i class="fas fa-key"></i>
+                            </button>
+                            <button class="action-btn btn-delete" title="Delete User" onclick="deleteUser({{ user_obj.id }}, '{{ user_obj.username }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                            <i class="fas fa-users" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                            No users found matching your criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if users.has_other_pages %}
+        <div class="pagination">
+            {% if users.has_previous %}
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">&laquo; First</a>
+                <a href="?page={{ users.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">&lsaquo; Previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ users.number }} of {{ users.paginator.num_pages }}
+            </span>
+
+            {% if users.has_next %}
+                <a href="?page={{ users.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next &rsaquo;</a>
+                <a href="?page={{ users.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Last &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- User Detail Modal -->
+        <div id="userDetailModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-user"></i> User Details</h2>
+                    <span class="close-modal" onclick="closeModal('userDetailModal')">&times;</span>
+                </div>
+                <div class="modal-body" id="userDetailContent">
+                    <!-- User details will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- User Edit Modal -->
+        <div id="userEditModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-edit"></i> Edit User</h2>
+                    <span class="close-modal" onclick="closeModal('userEditModal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <div id="userEditContent">
+                            <!-- Edit form will be loaded here -->
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="filter-btn" onclick="closeModal('userEditModal')">Cancel</button>
+                            <button type="submit" class="filter-btn" style="background: #28a745;">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Create Modal -->
+        <div id="userCreateModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-plus"></i> Create New User</h2>
+                    <span class="close-modal" onclick="closeModal('userCreateModal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="createUserForm">
+                        <div id="userCreateContent">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Username: <span style="color: var(--accent-color);">*</span></label>
+                                    <input type="text" name="username" class="form-input" required placeholder="Enter username">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email:</label>
+                                    <input type="email" name="email" class="form-input" placeholder="Enter email address">
+                                </div>
+                                <div class="form-group">
+                                    <label>First Name:</label>
+                                    <input type="text" name="first_name" class="form-input" placeholder="Enter first name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Last Name:</label>
+                                    <input type="text" name="last_name" class="form-input" placeholder="Enter last name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Role: <span style="color: var(--accent-color);">*</span></label>
+                                    <select name="role" class="form-input" required>
+                                        <option value="">Select Role</option>
+                                        {% for value, label in role_choices %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" name="is_active" checked>
+                                    <label>Active</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" name="is_staff">
+                                    <label>Staff Access</label>
+                                </div>
+                                <div style="background: rgba(255, 193, 7, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+                                    <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">
+                                        <i class="fas fa-info-circle"></i>
+                                        User will be created without a password. They will need to use the "Forgot Password" feature to set their password.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="filter-btn" onclick="closeModal('userCreateModal')">Cancel</button>
+                            <button type="submit" class="filter-btn" style="background: #28a745;">Create User</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Toast -->
+        <div id="toast" class="toast" style="display: none;">
+            <div id="toastMessage"></div>
+        </div>
+
+        <style>
+            /* Modal Styles */
+            .modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 2000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .modal-content {
+                background: var(--bg-glass);
+                backdrop-filter: blur(20px);
+                border: 1px solid var(--border-color);
+                border-radius: 15px;
+                max-width: 600px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 20px 40px var(--shadow);
+            }
+
+            .modal-header {
+                padding: 1.5rem;
+                border-bottom: 1px solid var(--border-color);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .modal-header h2 {
+                margin: 0;
+                color: var(--text-primary);
+            }
+
+            .close-modal {
+                font-size: 1.5rem;
+                cursor: pointer;
+                color: var(--text-secondary);
+                transition: color var(--transition-speed) ease;
+            }
+
+            .close-modal:hover {
+                color: var(--accent-color);
+            }
+
+            .modal-body {
+                padding: 1.5rem;
+            }
+
+            .detail-grid {
+                display: grid;
+                gap: 1rem;
+            }
+
+            .detail-item {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.75rem;
+                background: var(--bg-secondary);
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+            }
+
+            .detail-label {
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .detail-value {
+                color: var(--text-secondary);
+            }
+
+            .form-grid {
+                display: grid;
+                gap: 1rem;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .form-group label {
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .form-input {
+                padding: 0.75rem;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                background: var(--bg-secondary);
+                color: var(--text-primary);
+            }
+
+            .checkbox-group {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .modal-actions {
+                display: flex;
+                gap: 1rem;
+                justify-content: flex-end;
+                margin-top: 1.5rem;
+                padding-top: 1rem;
+                border-top: 1px solid var(--border-color);
+            }
+
+            /* Toast Styles */
+            .toast {
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: var(--bg-glass);
+                backdrop-filter: blur(20px);
+                border: 1px solid var(--border-color);
+                border-radius: 10px;
+                padding: 1rem 1.5rem;
+                z-index: 3000;
+                box-shadow: 0 10px 30px var(--shadow);
+                animation: slideIn 0.3s ease;
+            }
+
+            .toast.success {
+                border-left: 4px solid #28a745;
+            }
+
+            .toast.error {
+                border-left: 4px solid var(--accent-color);
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        </style>
+
+        <script>
+            // Include all the JavaScript from admin dashboard
+            // Theme Toggle
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const themeIcon = themeToggle.querySelector('i');
+
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            body.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+
+            function updateThemeIcon(theme) {
+                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+
+            // Sidebar Toggle
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const navbar = document.getElementById('navbar');
+            const mainContent = document.getElementById('mainContent');
+
+            sidebarToggle.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('mobile-open');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    navbar.classList.toggle('sidebar-collapsed');
+                    mainContent.classList.toggle('sidebar-collapsed');
+                    
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
+                }
+            });
+
+            // Load saved sidebar state
+            const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (sidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+                navbar.classList.add('sidebar-collapsed');
+                mainContent.classList.add('sidebar-collapsed');
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+
+            // Mobile responsiveness for user management
+            function handleMobileLayout() {
+                const isMobile = window.innerWidth <= 768;
+                
+                if (isMobile) {
+                    sidebar.classList.remove('collapsed');
+                    navbar.classList.remove('sidebar-collapsed');
+                    mainContent.classList.remove('sidebar-collapsed');
+                } else {
+                    sidebar.classList.remove('mobile-open');
+                }
+            }
+
+            // Update sidebar toggle
+            sidebarToggle.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('mobile-open');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    navbar.classList.toggle('sidebar-collapsed');
+                    mainContent.classList.toggle('sidebar-collapsed');
+                    
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
+                }
+            });
+
+            window.addEventListener('resize', handleMobileLayout);
+            handleMobileLayout();
+
+            // Close mobile sidebar when clicking outside
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    !sidebar.contains(e.target) && 
+                    !sidebarToggle.contains(e.target) &&
+                    sidebar.classList.contains('mobile-open')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            });
+
+            // User Management Functions
+            function viewUser(userId) {
+                fetch(`/accounts/admin/users/${userId}/view/`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('userDetailContent').innerHTML = `
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Username:</span>
+                                <span class="detail-value">${data.username}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Email:</span>
+                                <span class="detail-value">${data.email || 'Not provided'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Full Name:</span>
+                                <span class="detail-value">${data.first_name} ${data.last_name}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Role:</span>
+                                <span class="detail-value">${data.role}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Status:</span>
+                                <span class="detail-value">${data.is_active ? 'Active' : 'Inactive'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Staff Access:</span>
+                                <span class="detail-value">${data.is_staff ? 'Yes' : 'No'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Superuser:</span>
+                                <span class="detail-value">${data.is_superuser ? 'Yes' : 'No'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Date Joined:</span>
+                                <span class="detail-value">${data.date_joined}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Last Login:</span>
+                                <span class="detail-value">${data.last_login}</span>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('userDetailModal').style.display = 'flex';
+                })
+                .catch(error => {
+                    showToast('Error loading user details', 'error');
+                });
+            }
+
+            function editUser(userId) {
+                fetch(`/accounts/admin/users/${userId}/edit/`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const roleOptions = data.role_choices.map(choice => 
+                        `<option value="${choice[0]}" ${choice[0] === data.role ? 'selected' : ''}>${choice[1]}</option>`
+                    ).join('');
+
+                    document.getElementById('userEditContent').innerHTML = `
+                        <input type="hidden" name="user_id" value="${data.id}">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Username:</label>
+                                <input type="text" name="username" value="${data.username}" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email:</label>
+                                <input type="email" name="email" value="${data.email || ''}" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>First Name:</label>
+                                <input type="text" name="first_name" value="${data.first_name || ''}" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name:</label>
+                                <input type="text" name="last_name" value="${data.last_name || ''}" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Role:</label>
+                                <select name="role" class="form-input">
+                                    ${roleOptions}
+                                </select>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="is_active" ${data.is_active ? 'checked' : ''}>
+                                <label>Active</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="is_staff" ${data.is_staff ? 'checked' : ''}>
+                                <label>Staff Access</label>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('userEditModal').style.display = 'flex';
+                })
+                .catch(error => {
+                    showToast('Error loading user data', 'error');
+                });
+            }
+
+            function deleteUser(userId, username) {
+                if (confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
+                    fetch(`/accounts/admin/users/${userId}/delete/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': '{{ csrf_token }}',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            showToast(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showToast('Error deleting user', 'error');
+                    });
+                }
+            }
+
+            function createUser() {
+                document.getElementById('userCreateModal').style.display = 'flex';
+            }
+
+            function closeModal(modalId) {
+                document.getElementById(modalId).style.display = 'none';
+            }
+
+            function showToast(message, type) {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toastMessage');
+                
+                toastMessage.textContent = message;
+                toast.className = `toast ${type}`;
+                toast.style.display = 'block';
+                
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            }
+
+            // Form submission
+            document.getElementById('editUserForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const userId = formData.get('user_id');
+                
+                fetch(`/accounts/admin/users/${userId}/edit/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        closeModal('userEditModal');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showToast('Error updating user', 'error');
+                });
+            });
+
+            // Form submission for creating user
+            document.getElementById('createUserForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                
+                fetch('/accounts/admin/users/create/', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        closeModal('userCreateModal');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    showToast('Error creating user', 'error');
+                });
+            });
+
+            // Send Password Function
+            function sendPassword(userId, username, email) {
+                if (!email) {
+                    showToast('User has no email address', 'error');
+                    return;
+                }
+                
+                if (confirm(`Send a new password to ${username} at ${email}?`)) {
+                    const button = event.target.closest('.btn-password');
+                    const originalContent = button.innerHTML;
+                    
+                    // Show loading state
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    button.disabled = true;
+                    
+                    fetch(`/accounts/admin/users/${userId}/send-password/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': '{{ csrf_token }}',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                        } else {
+                            showToast(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        showToast('Error sending password', 'error');
+                    })
+                    .finally(() => {
+                        // Restore button state
+                        button.innerHTML = originalContent;
+                        button.disabled = false;
+                    });
+                }
+            }
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            });
+
+            // Add event listeners when DOM is loaded
+            document.addEventListener('DOMContentLoaded', function() {
+                // Close button event listeners
+                document.querySelectorAll('.close-modal').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const modal = this.closest('.modal');
+                        if (modal) {
+                            modal.style.display = 'none';
+                        }
+                    });
+                });
+
+                // ESC key to close modals
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        document.querySelectorAll('.modal').forEach(modal => {
+                            modal.style.display = 'none';
+                        });
+                    }
+                });
+            });
+        </script>
+    </main>
+</body>
+</html>

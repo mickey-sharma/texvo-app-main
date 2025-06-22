@@ -1,0 +1,365 @@
+<!-- Enhanced Payment Update Modal with Currency Support -->
+<div class="modal fade" id="updatePaymentModal" tabindex="-1" aria-labelledby="updatePaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background: var(--bg-glass); backdrop-filter: blur(20px); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title" id="updatePaymentModalLabel" style="color: var(--text-primary);">
+                    <i class="fas fa-money-bill-wave"></i> Update Payment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updatePaymentForm">
+                    <input type="hidden" id="invoiceId" name="invoice_id">
+                    
+                    <!-- Currency and Exchange Rate Row -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="invoiceCurrency" class="form-label" style="color: var(--text-primary);">
+                                <i class="fas fa-globe"></i> Invoice Currency
+                            </label>
+                            <select name="currency" class="form-select" id="invoiceCurrency" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                                <option value="INR">INR (₹) - Indian Rupee</option>
+                                <option value="USD">USD ($) - US Dollar</option>
+                                <option value="EUR">EUR (€) - Euro</option>
+                                <option value="GBP">GBP (£) - British Pound</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="exchangeRate" class="form-label" style="color: var(--text-primary);">
+                                <i class="fas fa-exchange-alt"></i> Exchange Rate to INR
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="exchangeRate" readonly style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                                <span class="input-group-text" id="rateStatus" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: #43e97b;">
+                                    <i class="fas fa-wifi"></i> Live
+                                </span>
+                            </div>
+                            <small class="text-muted">Real-time exchange rate</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Amount Due -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="amountDue" class="form-label" style="color: var(--text-primary);">
+                                <i class="fas fa-file-invoice-dollar"></i> Amount Due
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="currencySymbol" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">₹</span>
+                                <input type="number" name="amount_due" class="form-control" id="amountDue" step="0.01" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-calculator"></i> Equivalent in INR: <span id="amountInINR" style="color: #43e97b; font-weight: 600;">₹0</span>
+                            </small>
+                        </div>
+                        
+                        <!-- Amount Paid -->
+                        <div class="col-md-6">
+                            <label for="amountPaid" class="form-label" style="color: var(--text-primary);">
+                                <i class="fas fa-hand-holding-usd"></i> Amount Paid
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="currencySymbolPaid" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">₹</span>
+                                <input type="number" name="amount_paid" class="form-control" id="amountPaid" step="0.01" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                            </div>
+                            <small class="text-muted">
+                                <i class="fas fa-calculator"></i> Equivalent in INR: <span id="paidInINR" style="color: #43e97b; font-weight: 600;">₹0</span>
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Status and Date -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="paymentStatus" class="form-label" style="color: var(--text-primary);">
+                                <i class="fas fa-check-circle"></i> Payment Status
+                            </label>
+                            <select name="payment_status" class="form-select" id="paymentStatus" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                                <option value="Pending">Pending</option>
+                                <option value="Partial">Partial Payment</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="paymentDate" class="form-label" style="color: var(--text-primary);">
+                                <i class="fas fa-calendar-alt"></i> Payment Date
+                            </label>
+                            <input type="date" name="payment_date" class="form-control" id="paymentDate" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Summary -->
+                    <div class="alert" id="paymentSummary" style="background: rgba(79, 172, 254, 0.1); border: 1px solid rgba(79, 172, 254, 0.2); color: var(--text-primary);">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-info-circle me-2" style="color: #4facfe;"></i>
+                            <strong>Payment Summary</strong>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <small><strong>Total Due (INR):</strong><br><span id="totalDueINR">₹0</span></small>
+                            </div>
+                            <div class="col-md-4">
+                                <small><strong>Paid (INR):</strong><br><span id="totalPaidINR">₹0</span></small>
+                            </div>
+                            <div class="col-md-4">
+                                <small><strong>Balance (INR):</strong><br><span id="balanceINR">₹0</span></small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Currency Conversion Note -->
+                    <div class="alert alert-warning" style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.2); color: var(--text-primary);">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exchange-alt me-2" style="color: #ffc107;"></i>
+                            <div>
+                                <strong>Multi-Currency Support:</strong><br>
+                                <small>All amounts are converted to INR for dashboard calculations using live exchange rates. Original currency amounts are preserved in the invoice.</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary);">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-primary" onclick="updatePayment()" style="background: linear-gradient(135deg, #667eea, #764ba2); border: none;">
+                    <i class="fas fa-save"></i> Update Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Currency symbols and live exchange rates
+const currencySymbols = {
+    'INR': '₹',
+    'USD': '$',
+    'EUR': '€',
+    'GBP': '£'
+};
+
+// Exchange rates (will be populated from backend)
+let exchangeRates = {
+    'USD_TO_INR': 82.0,
+    'EUR_TO_INR': 88.5,
+    'GBP_TO_INR': 101.2,
+    'last_updated': 'fallback'
+};
+
+// Load exchange rates from backend
+try {
+    exchangeRates = {{ dashboard_data.exchange_rates|safe }};
+} catch(e) {
+    console.log('Using fallback exchange rates');
+}
+
+// Update currency display when currency changes
+document.getElementById('invoiceCurrency').addEventListener('change', function() {
+    const currency = this.value;
+    const symbol = currencySymbols[currency];
+    
+    // Update currency symbols
+    document.getElementById('currencySymbol').textContent = symbol;
+    document.getElementById('currencySymbolPaid').textContent = symbol;
+    
+    // Update exchange rate display
+    let rate = 1;
+    if (currency === 'USD') rate = exchangeRates.USD_TO_INR;
+    else if (currency === 'EUR') rate = exchangeRates.EUR_TO_INR;
+    else if (currency === 'GBP') rate = exchangeRates.GBP_TO_INR;
+    
+    document.getElementById('exchangeRate').value = rate.toFixed(2);
+    
+    // Update rate status indicator
+    const rateStatus = document.getElementById('rateStatus');
+    if (exchangeRates.last_updated === 'live') {
+        rateStatus.innerHTML = '<i class="fas fa-wifi"></i> Live';
+        rateStatus.style.color = '#43e97b';
+    } else {
+        rateStatus.innerHTML = '<i class="fas fa-wifi-slash"></i> Cached';
+        rateStatus.style.color = '#ffa726';
+    }
+    
+    // Recalculate INR amounts
+    updateINRAmounts();
+});
+
+// Update INR equivalent amounts
+function updateINRAmounts() {
+    const currency = document.getElementById('invoiceCurrency').value;
+    const amountDue = parseFloat(document.getElementById('amountDue').value) || 0;
+    const amountPaid = parseFloat(document.getElementById('amountPaid').value) || 0;
+    
+    let rate = 1;
+    if (currency === 'USD') rate = exchangeRates.USD_TO_INR;
+    else if (currency === 'EUR') rate = exchangeRates.EUR_TO_INR;
+    else if (currency === 'GBP') rate = exchangeRates.GBP_TO_INR;
+    
+    const dueINR = amountDue * rate;
+    const paidINR = amountPaid * rate;
+    const balanceINR = dueINR - paidINR;
+    
+    // Update display values
+    document.getElementById('amountInINR').textContent = `₹${dueINR.toLocaleString('en-IN', {maximumFractionDigits: 2})}`;
+    document.getElementById('paidInINR').textContent = `₹${paidINR.toLocaleString('en-IN', {maximumFractionDigits: 2})}`;
+    
+    // Update payment summary
+    document.getElementById('totalDueINR').textContent = `₹${dueINR.toLocaleString('en-IN', {maximumFractionDigits: 2})}`;
+    document.getElementById('totalPaidINR').textContent = `₹${paidINR.toLocaleString('en-IN', {maximumFractionDigits: 2})}`;
+    document.getElementById('balanceINR').textContent = `₹${balanceINR.toLocaleString('en-IN', {maximumFractionDigits: 2})}`;
+    
+    // Update balance color
+    const balanceElement = document.getElementById('balanceINR');
+    if (balanceINR <= 0) {
+        balanceElement.style.color = '#43e97b';
+    } else {
+        balanceElement.style.color = '#ffa726';
+    }
+}
+
+// Add event listeners for amount changes
+document.getElementById('amountDue').addEventListener('input', updateINRAmounts);
+document.getElementById('amountPaid').addEventListener('input', updateINRAmounts);
+
+// Initialize modal on show
+document.getElementById('updatePaymentModal').addEventListener('show.bs.modal', function() {
+    // Set today's date as default
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('paymentDate').value = today;
+    
+    // Trigger currency change to set initial values
+    document.getElementById('invoiceCurrency').dispatchEvent(new Event('change'));
+    
+    // Focus on first input
+    setTimeout(() => {
+        document.getElementById('amountDue').focus();
+    }, 300);
+});
+
+// Enhanced update payment function
+function updatePayment() {
+    const form = document.getElementById('updatePaymentForm');
+    const formData = new FormData(form);
+    
+    // Add calculated INR values
+    const currency = document.getElementById('invoiceCurrency').value;
+    const amountDue = parseFloat(document.getElementById('amountDue').value) || 0;
+    const amountPaid = parseFloat(document.getElementById('amountPaid').value) || 0;
+    
+    let rate = 1;
+    if (currency === 'USD') rate = exchangeRates.USD_TO_INR;
+    else if (currency === 'EUR') rate = exchangeRates.EUR_TO_INR;
+    else if (currency === 'GBP') rate = exchangeRates.GBP_TO_INR;
+    
+    formData.append('amount_due_inr', (amountDue * rate).toFixed(2));
+    formData.append('amount_paid_inr', (amountPaid * rate).toFixed(2));
+    formData.append('exchange_rate', rate.toFixed(2));
+    
+    // Show loading state
+    const updateBtn = document.querySelector('#updatePaymentModal .btn-primary');
+    const originalText = updateBtn.innerHTML;
+    updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+    updateBtn.disabled = true;
+    
+    // Submit form (you'll need to implement the actual submission logic)
+    fetch('/admin/update-payment/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Success notification
+            showNotification('Payment updated successfully!', 'success');
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('updatePaymentModal'));
+            modal.hide();
+            
+            // Refresh dashboard data
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showNotification('Error updating payment: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Network error. Please try again.', 'error');
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        // Reset button state
+        updateBtn.innerHTML = originalText;
+        updateBtn.disabled = false;
+    });
+}
+
+// Notification function
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        ${message}
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+</script>
+
+<style>
+/* Modal styling for dark/light theme compatibility */
+.modal-content {
+    background: var(--bg-glass) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color) !important;
+}
+
+.form-control, .form-select {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control:focus, .form-select:focus {
+    background: var(--bg-secondary) !important;
+    border-color: #4facfe !important;
+    box-shadow: 0 0 0 0.2rem rgba(79, 172, 254, 0.25) !important;
+    color: var(--text-primary) !important;
+}
+
+.input-group-text {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.alert {
+    border-radius: 12px;
+}
+
+.btn-close {
+    filter: invert(1);
+}
+
+[data-theme="light"] .btn-close {
+    filter: none;
+}
+</style>

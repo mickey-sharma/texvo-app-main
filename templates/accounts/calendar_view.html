@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar View - Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #dc3545;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 60px;
+            --transition-speed: 0.3s;
+        }
+
+        /* Light Mode Variables */
+        [data-theme="light"] {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --calendar-bg: #ffffff;
+            --calendar-border: #e0e0e0;
+            --calendar-today: #e3f2fd;
+            --calendar-weekend: #f5f5f5;
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            --bg-primary: #000000;
+            --bg-secondary: #1a1a1a;
+            --bg-glass: rgba(26, 26, 26, 0.9);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.5);
+            --calendar-bg: #1a1a1a;
+            --calendar-border: #333333;
+            --calendar-today: #1e3a8a;
+            --calendar-weekend: #2a2a2a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: all var(--transition-speed) ease;
+        }
+
+        /* Navbar and Sidebar styles (same as other pages) */
+        .navbar {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            z-index: 1000;
+            transition: left var(--transition-speed) ease;
+        }
+
+        .navbar.sidebar-collapsed {
+            left: var(--sidebar-collapsed-width);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-color);
+            z-index: 1001;
+            transition: width var(--transition-speed) ease;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .menu-item.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .menu-item i {
+            min-width: 20px;
+            margin-right: 1rem;
+            text-align: center;
+        }
+
+        .menu-text {
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+        }
+
+        .sidebar.collapsed .sidebar-logo {
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: 80px;
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+            transition: margin-left var(--transition-speed) ease;
+        }
+
+        .main-content.sidebar-collapsed {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* Calendar-specific styles */
+        .calendar-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-nav h1 {
+            color: var(--text-primary);
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .nav-btn.secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+
+        .stat-card.info {
+            background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+        }
+
+        .calendar-container {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .calendar {
+            width: 100%;
+            background: var(--calendar-bg);
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .weekday {
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-auto-rows: minmax(120px, auto);
+        }
+
+        .calendar-day {
+            border: 1px solid var(--calendar-border);
+            padding: 0.5rem;
+            position: relative;
+            background: var(--calendar-bg);
+            transition: all var(--transition-speed) ease;
+            min-height: 120px;
+        }
+
+        .calendar-day:hover {
+            background: var(--bg-secondary);
+        }
+
+        .calendar-day.today {
+            background: var(--calendar-today);
+            border-color: var(--primary-color);
+            border-width: 2px;
+        }
+
+        .calendar-day.weekend {
+            background: var(--calendar-weekend);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .day-number {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .day-events {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .event {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            color: white;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .event:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .event.task {
+            background: var(--primary-color);
+        }
+
+        .event.task.completed {
+            background: var(--success-color);
+        }
+
+        .event.task.pending {
+            background: var(--warning-color);
+            color: #333;
+        }
+
+        .event.task.in-progress {
+            background: var(--info-color);
+        }
+
+        .event.payment {
+            background: var(--success-color);
+        }
+
+        .event-more {
+            background: var(--text-secondary);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px var(--shadow);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color var(--transition-speed) ease;
+        }
+
+        .close-modal:hover {
+            color: var(--accent-color);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .event-details {
+            margin-bottom: 1.5rem;
+        }
+
+        .event-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .detail-value {
+            color: var(--text-secondary);
+        }
+
+        .payment-progress {
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--bg-secondary);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--success-color);
+            transition: width 0.3s ease;
+        }
+
+        /* Legend */
+        .calendar-legend {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .calendar-nav h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                left: 0;
+                padding: 1rem;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 2000;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .calendar-header {
+                padding: 1.5rem;
+            }
+
+            .calendar-nav {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .calendar-nav h1 {
+                font-size: 1.5rem;
+                margin: 0;
+            }
+
+            .nav-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+
+            .nav-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+                margin-top: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-card h3 {
+                font-size: 1.5rem;
+            }
+
+            .stat-card p {
+                font-size: 0.8rem;
+            }
+
+            .calendar-days {
+                grid-auto-rows: minmax(80px, auto);
+            }
+
+            .calendar-day {
+                min-height: 80px;
+                padding: 0.25rem;
+            }
+
+            .day-number {
+                font-size: 0.8rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .day-events {
+                max-height: 50px;
+                gap: 0.15rem;
+            }
+
+            .event {
+                font-size: 0.6rem;
+                padding: 0.15rem 0.25rem;
+                line-height: 1.1;
+            }
+
+            .weekday {
+                padding: 0.75rem 0.25rem;
+                font-size: 0.8rem;
+            }
+
+            .modal-content {
+                margin: 1rem;
+                max-height: 90vh;
+                max-width: 95vw;
+            }
+
+            .modal-header,
+            .modal-body {
+                padding: 1rem;
+            }
+
+            .event-detail {
+                flex-direction: column;
+                gap: 0.5rem;
+                text-align: left;
+            }
+
+            .detail-label {
+                font-weight: 600;
+                color: var(--accent-color);
+            }
+
+            .calendar-legend {
+                padding: 1rem;
+            }
+
+            .legend-items {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 0.5rem;
+            }
+
+            .calendar-header {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .calendar-nav h1 {
+                font-size: 1.3rem;
+            }
+
+            .nav-btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .stat-card {
+                padding: 0.75rem;
+            }
+
+            .stat-card h3 {
+                font-size: 1.3rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .calendar-days {
+                grid-auto-rows: minmax(60px, auto);
+            }
+
+            .calendar-day {
+                min-height: 60px;
+                padding: 0.15rem;
+            }
+
+            .day-number {
+                font-size: 0.7rem;
+            }
+
+            .day-events {
+                max-height: 35px;
+            }
+
+            .event {
+                font-size: 0.55rem;
+                padding: 0.1rem 0.2rem;
+            }
+
+            .weekday {
+                padding: 0.5rem 0.15rem;
+                font-size: 0.7rem;
+            }
+
+            .modal-content {
+                margin: 0.5rem;
+                border-radius: 10px;
+            }
+
+            .modal-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .close-modal {
+                font-size: 1.3rem;
+            }
+
+            .calendar-legend {
+                padding: 0.75rem;
+            }
+
+            .legend-title {
+                font-size: 0.9rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .legend-item {
+                font-size: 0.8rem;
+            }
+
+            .legend-color {
+                width: 12px;
+                height: 12px;
+            }
+        }
+
+        /* Touch-friendly improvements for mobile */
+        @media (hover: none) and (pointer: coarse) {
+            .calendar-day {
+                min-height: 80px;
+            }
+
+            .event {
+                min-height: 28px;
+                padding: 0.25rem 0.4rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .nav-btn {
+                min-height: 44px;
+                min-width: 100px;
+            }
+
+            .close-modal {
+                min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .sidebar-toggle,
+            .theme-toggle {
+                min-width: 44px;
+                min-height: 44px;
+            }
+        }
+
+        /* Landscape orientation for small devices */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .calendar-nav {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .calendar-nav h1 {
+                font-size: 1.4rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .calendar-days {
+                grid-auto-rows: minmax(70px, auto);
+            }
+
+            .modal-content {
+                max-height: 85vh;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">TEXVO</div>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="{% url 'accounts:admin_dashboard' %}" class="menu-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span class="menu-text">Dashboard</span>
+            </a>
+            <a href="{% url 'accounts:user_management' %}" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span class="menu-text">User Management</span>
+            </a>
+            <a href="{% url 'accounts:task_management' %}" class="menu-item">
+                <i class="fas fa-tasks"></i>
+                <span class="menu-text">Tasks</span>
+            </a>
+            <a href="{% url 'accounts:invoice_management' %}" class="menu-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span class="menu-text">Invoices</span>
+            </a>
+            <a href="{% url 'accounts:calendar_view' %}" class="menu-item active">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="menu-text">Calendar</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-shield-alt"></i>
+                <span class="menu-text">Security</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-tools"></i>
+                <span class="menu-text">Maintenance</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-bell"></i>
+                <span class="menu-text">Notifications</span>
+            </a>
+        </nav>
+    </div>
+
+    <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <div class="navbar-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">Calendar View</div>
+            </div>
+            <div class="navbar-right">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-info">
+                    <span>{{ user.username }}</span>
+                </div>
+                <a href="{% url 'accounts:logout' %}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content" id="mainContent">
+        <div class="calendar-header">
+            <div class="calendar-nav">
+                <h1><i class="fas fa-calendar-alt"></i> {{ month_name }} {{ current_year }}</h1>
+                <div class="nav-controls">
+                    <a href="?year={{ prev_year }}&month={{ prev_month }}" class="nav-btn secondary">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                    <a href="?year={{ current_date.year }}&month={{ current_date.month }}" class="nav-btn">
+                        <i class="fas fa-calendar-day"></i> Today
+                    </a>
+                    <a href="?year={{ next_year }}&month={{ next_month }}" class="nav-btn secondary">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>{{ total_tasks }}</h3>
+                    <p>Total Tasks</p>
+                </div>
+                <div class="stat-card success">
+                    <h3>{{ completed_tasks }}</h3>
+                    <p>Completed</p>
+                </div>
+                <div class="stat-card warning">
+                    <h3>{{ pending_tasks }}</h3>
+                    <p>Pending</p>
+                </div>
+                <div class="stat-card info">
+                    <h3>{{ in_progress_tasks }}</h3>
+                    <p>In Progress</p>
+                </div>
+                <div class="stat-card">
+                    <h3>{{ total_invoices }}</h3>
+                    <p>Total Invoices</p>
+                </div>
+                <div class="stat-card success">
+                    <h3>{{ paid_invoices }}</h3>
+                    <p>Paid Invoices</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar-container">
+            <div class="calendar">
+                <div class="calendar-weekdays">
+                    <div class="weekday">Sunday</div>
+                    <div class="weekday">Monday</div>
+                    <div class="weekday">Tuesday</div>
+                    <div class="weekday">Wednesday</div>
+                    <div class="weekday">Thursday</div>
+                    <div class="weekday">Friday</div>
+                    <div class="weekday">Saturday</div>
+                </div>
+                <div class="calendar-days" id="calendarDays">
+                    <!-- Calendar days will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar-legend">
+            <div class="legend-title">Legend</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--primary-color);"></div>
+                    <span>Task Deadline</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--success-color);"></div>
+                    <span>Completed Task / Payment</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--warning-color);"></div>
+                    <span>Pending Task</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--info-color);"></div>
+                    <span>In Progress Task</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Details Modal -->
+        <div id="eventModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Event Details</h2>
+                    <span class="close-modal" onclick="closeModal()">&times;</span>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Event details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Calendar data from Django
+        const calendarEvents = {{ calendar_events|safe }};
+        const currentYear = {{ current_year }};
+        const currentMonth = {{ current_month }};
+        const today = new Date('{{ current_date|date:"Y-m-d" }}');
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const themeIcon = themeToggle.querySelector('i');
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        body.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Sidebar Toggle
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const navbar = document.getElementById('navbar');
+        const mainContent = document.getElementById('mainContent');
+
+        sidebarToggle.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                navbar.classList.toggle('sidebar-collapsed');
+                mainContent.classList.toggle('sidebar-collapsed');
+                
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            }
+        });        // Mobile responsiveness
+        function handleMobileLayout() {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                sidebar.classList.remove('collapsed');
+                navbar.classList.remove('sidebar-collapsed');
+                mainContent.classList.remove('sidebar-collapsed');
+                
+                // Add mobile-specific calendar features
+                addMobileCalendarFeatures();
+            } else {
+                sidebar.classList.remove('mobile-open');
+                removeMobileCalendarFeatures();
+            }
+        }
+
+        // Add mobile-specific calendar features
+        function addMobileCalendarFeatures() {
+            // Add touch event listeners for better mobile interaction
+            const calendarDays = document.querySelectorAll('.calendar-day');
+            calendarDays.forEach(day => {
+                // Add touch feedback
+                day.addEventListener('touchstart', function() {
+                    this.style.backgroundColor = 'var(--bg-secondary)';
+                });
+                
+                day.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        this.style.backgroundColor = '';
+                    }, 150);
+                });
+            });
+
+            // Enable horizontal scroll for calendar table
+            const calendarContainer = document.querySelector('.calendar-container');
+            if (calendarContainer) {
+                calendarContainer.style.overflowX = 'auto';
+                calendarContainer.style.webkitOverflowScrolling = 'touch';
+            }
+
+            // Optimize modal for mobile
+            const modal = document.getElementById('eventModal');
+            if (modal) {
+                modal.addEventListener('touchstart', handleModalTouch);
+            }
+        }
+
+        // Remove mobile features for desktop
+        function removeMobileCalendarFeatures() {
+            const calendarDays = document.querySelectorAll('.calendar-day');
+            calendarDays.forEach(day => {
+                day.removeEventListener('touchstart', function() {});
+                day.removeEventListener('touchend', function() {});
+                day.style.backgroundColor = '';
+            });
+
+            const modal = document.getElementById('eventModal');
+            if (modal) {
+                modal.removeEventListener('touchstart', handleModalTouch);
+            }
+        }
+
+        // Handle modal touch events
+        function handleModalTouch(e) {
+            // Prevent modal from closing when touching modal content
+            if (e.target.closest('.modal-content')) {
+                e.stopPropagation();
+            }
+        }
+
+        // Enhanced mobile event handling
+        function showTaskDetailsMobile(task) {
+            // Enhanced mobile version of task details
+            const modal = document.getElementById('eventModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.innerHTML = `<i class="fas fa-tasks"></i> ${task.task_code}`;
+            
+            let paymentSection = '';
+            if (task.payment_info) {
+                const paymentPercentage = task.payment_info.payment_percentage || 0;
+                paymentSection = `
+                    <div class="event-details" style="margin-top: 1rem;">
+                        <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1rem;">💰 Payment Info</h4>
+                        <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="font-weight: 600; color: var(--text-primary);">Status:</span>
+                                <span style="color: var(--text-secondary);">${task.payment_info.payment_status}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="font-weight: 600; color: var(--text-primary);">Paid:</span>
+                                <span style="color: var(--text-secondary);">${task.payment_info.amount_paid}</span>
+                            </div>
+                            <div class="payment-progress" style="margin-top: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">Progress</span>
+                                    <span style="color: var(--text-secondary); font-size: 0.9rem;">${paymentPercentage.toFixed(1)}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${paymentPercentage}%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            modalBody.innerHTML = `
+                <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 10px; margin-bottom: 1rem;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1rem;">📋 Task Details</h4>
+                    <div style="space-y: 0.75rem;">
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">Module:</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">${task.module_name}</div>
+                        </div>
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">Client:</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">${task.client_name}</div>
+                        </div>
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">Status:</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">${task.status}</div>
+                        </div>
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">Assigned to:</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">${task.allocation}</div>
+                        </div>
+                        <div style="margin-bottom: 0.75rem;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">Deadline:</div>
+                            <div style="color: var(--accent-color); font-size: 0.9rem; font-weight: 600;">${new Date(task.deadline).toLocaleString()}</div>
+                        </div>
+                    </div>
+                </div>
+                ${paymentSection}
+            `;
+
+            modal.style.display = 'flex';
+            
+            // Add mobile-specific modal styling
+            if (window.innerWidth <= 768) {
+                modal.querySelector('.modal-content').style.margin = '1rem';
+                modal.querySelector('.modal-content').style.maxHeight = '90vh';
+            }
+        }
+
+        // Override the original function for mobile
+        if (window.innerWidth <= 768) {
+            window.showTaskDetails = showTaskDetailsMobile;
+        }
+
+        window.addEventListener('resize', handleMobileLayout);
+        handleMobileLayout();
+
+        // Close mobile sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !sidebarToggle.contains(e.target) &&
+                sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+
+        // Calendar generation
+        function generateCalendar() {
+            const calendarDays = document.getElementById('calendarDays');
+            const firstDay = new Date(currentYear, currentMonth - 1, 1);
+            const lastDay = new Date(currentYear, currentMonth, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+            calendarDays.innerHTML = '';
+
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const dayElement = createDayElement(date);
+                calendarDays.appendChild(dayElement);
+            }
+        }
+
+        function createDayElement(date) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day';
+            
+            const isCurrentMonth = date.getMonth() === currentMonth - 1;
+            const isToday = date.toDateString() === today.toDateString();
+            const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+            
+            if (!isCurrentMonth) dayElement.classList.add('other-month');
+            if (isToday) dayElement.classList.add('today');
+            if (isWeekend) dayElement.classList.add('weekend');
+
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = date.getDate();
+            dayElement.appendChild(dayNumber);
+
+            const eventsContainer = document.createElement('div');
+            eventsContainer.className = 'day-events';
+            
+            const dateKey = date.toISOString().split('T')[0];
+            const dayEvents = calendarEvents[dateKey];
+            
+            if (dayEvents) {
+                let eventCount = 0;
+                const maxEvents = 3;
+
+                // Add task events
+                dayEvents.tasks.forEach(task => {
+                    if (eventCount < maxEvents) {
+                        const eventElement = createTaskEvent(task);
+                        eventsContainer.appendChild(eventElement);
+                        eventCount++;
+                    }
+                });
+
+                // Add payment events
+                dayEvents.payments.forEach(payment => {
+                    if (eventCount < maxEvents) {
+                        const eventElement = createPaymentEvent(payment);
+                        eventsContainer.appendChild(eventElement);
+                        eventCount++;
+                    }
+                });
+
+                // Show "more" indicator if there are more events
+                const totalEvents = dayEvents.tasks.length + dayEvents.payments.length;
+                if (totalEvents > maxEvents) {
+                    const moreElement = document.createElement('div');
+                    moreElement.className = 'event event-more';
+                    moreElement.textContent = `+${totalEvents - maxEvents} more`;
+                    moreElement.onclick = () => showDayEvents(dateKey, dayEvents);
+                    eventsContainer.appendChild(moreElement);
+                }
+            }
+
+            dayElement.appendChild(eventsContainer);
+            return dayElement;
+        }
+
+        function createTaskEvent(task) {
+            const eventElement = document.createElement('div');
+            eventElement.className = `event task ${task.status.toLowerCase().replace(' ', '-')}`;
+            eventElement.textContent = `${task.task_code}: ${task.module_name.substring(0, 15)}...`;
+            eventElement.title = `${task.task_code} - ${task.module_name}\nClient: ${task.client_name}\nStatus: ${task.status}`;
+            eventElement.onclick = () => showTaskDetails(task);
+            return eventElement;
+        }
+
+        function createPaymentEvent(payment) {
+            const eventElement = document.createElement('div');
+            eventElement.className = 'event payment';
+            eventElement.textContent = `Payment: ${payment.formatted_amount}`;
+            eventElement.title = `Payment for ${payment.task_code}\nClient: ${payment.client_name}\nAmount: ${payment.formatted_amount}`;
+            eventElement.onclick = () => showPaymentDetails(payment);
+            return eventElement;
+        }
+
+        function showTaskDetails(task) {
+            const modal = document.getElementById('eventModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.innerHTML = `<i class="fas fa-tasks"></i> Task Details`;
+            
+            let paymentSection = '';
+            if (task.payment_info) {
+                const paymentPercentage = task.payment_info.payment_percentage || 0;
+                paymentSection = `
+                    <div class="event-details">
+                        <h4 style="color: var(--text-primary); margin-bottom: 1rem;">💰 Payment Information</h4>
+                        <div class="event-detail">
+                            <span class="detail-label">Amount Due:</span>
+                            <span class="detail-value">${task.payment_info.formatted_amount}</span>
+                        </div>
+                        <div class="event-detail">
+                            <span class="detail-label">Amount Paid:</span>
+                            <span class="detail-value">${task.payment_info.amount_paid}</span>
+                        </div>
+                        <div class="event-detail">
+                            <span class="detail-label">Balance Due:</span>
+                            <span class="detail-value">${task.payment_info.balance_due}</span>
+                        </div>
+                        <div class="event-detail">
+                            <span class="detail-label">Payment Status:</span>
+                            <span class="detail-value">${task.payment_info.payment_status}</span>
+                        </div>
+                        <div class="payment-progress">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="font-weight: 600;">Payment Progress</span>
+                                <span>${paymentPercentage.toFixed(1)}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${paymentPercentage}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            modalBody.innerHTML = `
+                <div class="event-details">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem;">📋 Task Information</h4>
+                    <div class="event-detail">
+                        <span class="detail-label">Task Code:</span>
+                        <span class="detail-value">${task.task_code}</span>
+                    </div>
+                    <div class="event-detail">
+                        <span class="detail-label">Module:</span>
+                        <span class="detail-value">${task.module_name}</span>
+                    </div>
+                    <div class="event-detail">
+                        <span class="detail-label">Client:</span>
+                        <span class="detail-value">${task.client_name}</span>
+                    </div>
+                    <div class="event-detail">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">${task.status}</span>
+                    </div>
+                    <div class="event-detail">
+                        <span class="detail-label">Deadline:</span>
+                        <span class="detail-value">${new Date(task.deadline).toLocaleString()}</span>
+                    </div>
+                    <div class="event-detail">
+                        <span class="detail-label">Assigned to:</span>
+                        <span class="detail-value">${task.allocation}</span>
+                    </div>
+                </div>
+                ${paymentSection}
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function showPaymentDetails(payment) {
+            const modal = document.getElementById('eventModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.innerHTML = `<i class="fas fa-dollar-sign"></i> Payment Details`;
+            
+            modalBody.innerHTML = `
+                <div class="event-details">
+                    <h4 style="color: var(--text-primary); margin-bottom: 1rem;">💳 Payment Information</h4>
+                    <div class="event-detail">
+                        <span class="detail-label">Invoice Number:</span>
+                        <span class="detail-value">${payment.invoice_number}</span>
+                    </div>
+                    <div class="event-detail">
+                        <span class="detail-label">Task Code:</span>
+                        <span class="detail-value">${payment.task_code}</span>
+                    </div>
+                    <div class="event-detail">
+                        <span class="detail-label">Client:</span>
+                        <span class="detail-value">${payment.client_name}</span>
+                    </div>
+                    <div class="event-detail">
+                        <span class="detail-label">Amount Paid:</span>
+                        <span class="detail-value">${payment.formatted_amount}</span>
+                    </div>
+                    <div class="event-detail">
+                        <span class="detail-label">Payment Status:</span>
+                        <span class="detail-value">${payment.payment_status}</span>
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function showDayEvents(dateKey, dayEvents) {
+            const modal = document.getElementById('eventModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            const date = new Date(dateKey);
+            modalTitle.innerHTML = `<i class="fas fa-calendar-day"></i> Events for ${date.toLocaleDateString()}`;
+            
+            let tasksHtml = '';
+            let paymentsHtml = '';
+
+            if (dayEvents.tasks.length > 0) {
+                tasksHtml = `
+                    <div class="event-details">
+                        <h4 style="color: var(--text-primary); margin-bottom: 1rem;">📋 Task Deadlines</h4>
+                        ${dayEvents.tasks.map(task => `
+                            <div class="event-detail" onclick="showTaskDetails(${JSON.stringify(task).replace(/"/g, '&quot;')})" style="cursor: pointer;">
+                                <span class="detail-label">${task.task_code}:</span>
+                                <span class="detail-value">${task.module_name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            if (dayEvents.payments.length > 0) {
+                paymentsHtml = `
+                    <div class="event-details">
+                        <h4 style="color: var(--text-primary); margin-bottom: 1rem;">💳 Payments</h4>
+                        ${dayEvents.payments.map(payment => `
+                            <div class="event-detail" onclick="showPaymentDetails(${JSON.stringify(payment).replace(/"/g, '&quot;')})" style="cursor: pointer;">
+                                <span class="detail-label">${payment.invoice_number}:</span>
+                                <span class="detail-value">${payment.formatted_amount}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            modalBody.innerHTML = tasksHtml + paymentsHtml;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('eventModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('eventModal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Close modal with escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Initialize calendar
+        generateCalendar();
+    </script>
+</body>
+</html>

@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expert Payments - Texvo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Copy styles from admin_dashboard.html */
+        :root { --primary-color: #667eea; --secondary-color: #764ba2; --accent-color: #dc3545; --sidebar-width: 250px; --sidebar-collapsed-width: 60px; --transition-speed: 0.3s; }
+        [data-theme="light"] { --bg-primary: #f8f9fa; --bg-secondary: #ffffff; --bg-glass: rgba(255,255,255,0.9); --text-primary: #333; --text-secondary: #666; --border-color: rgba(0,0,0,0.1); --shadow: rgba(0,0,0,0.1);}
+        [data-theme="dark"] { --bg-primary: #000; --bg-secondary: #1a1a1a; --bg-glass: rgba(26,26,26,0.9); --text-primary: #fff; --text-secondary: rgba(255,255,255,0.7); --border-color: rgba(255,255,255,0.1); --shadow: rgba(0,0,0,0.5);}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; transition: all var(--transition-speed) ease;}
+        .navbar { background: var(--bg-glass); backdrop-filter: blur(20px); padding: 1rem 2rem; border-bottom: 1px solid var(--border-color); position: fixed; top: 0; left: var(--sidebar-width); right: 0; z-index: 1000; transition: left var(--transition-speed) ease;}
+        .navbar.sidebar-collapsed { left: var(--sidebar-collapsed-width);}
+        .navbar-content { display: flex; justify-content: space-between; align-items: center;}
+        .navbar-left { display: flex; align-items: center; gap: 1rem;}
+        .sidebar-toggle { background: none; border: none; color: var(--text-primary); font-size: 1.2rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: all var(--transition-speed) ease;}
+        .sidebar-toggle:hover { background: var(--bg-secondary);}
+        .logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 2px;}
+        .navbar-right { display: flex; align-items: center; gap: 1rem;}
+        .theme-toggle { background: none; border: none; color: var(--text-primary); font-size: 1.2rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: all var(--transition-speed) ease;}
+        .theme-toggle:hover { background: var(--bg-secondary);}
+        .user-info { display: flex; align-items: center; gap: 0.5rem;}
+        .logout-btn { background: var(--bg-secondary); color: var(--text-primary); border: none; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; transition: all var(--transition-speed) ease; display: flex; align-items: center; gap: 0.5rem;}
+        .logout-btn:hover { background: var(--accent-color); color: white;}
+        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-glass); backdrop-filter: blur(20px); border-right: 1px solid var(--border-color); z-index: 1001; transition: width var(--transition-speed) ease; overflow: hidden;}
+        .sidebar.collapsed { width: var(--sidebar-collapsed-width);}
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border-color); text-align: center;}
+        .sidebar-logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; white-space: nowrap;}
+        .sidebar-menu { padding: 1rem 0;}
+        .menu-item { display: flex; align-items: center; padding: 1rem 1.5rem; color: var(--text-primary); text-decoration: none; transition: all var(--transition-speed) ease; cursor: pointer;}
+        .menu-item:hover { background: var(--bg-secondary);}
+        .menu-item.active { background: var(--accent-color); color: white;}
+        .menu-item i { min-width: 20px; margin-right: 1rem; text-align: center;}
+        .menu-text { white-space: nowrap; opacity: 1; transition: opacity var(--transition-speed) ease;}
+        .sidebar.collapsed .menu-text { opacity: 0;}
+        .sidebar.collapsed .sidebar-logo { font-size: 1rem;}
+        .main-content { margin-left: var(--sidebar-width); margin-top: 80px; padding: 2rem; min-height: calc(100vh - 80px); transition: margin-left var(--transition-speed) ease;}
+        .main-content.sidebar-collapsed { margin-left: var(--sidebar-collapsed-width);}
+        
+        /* Additional styles for expert payments page */
+        .page-header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+        
+        .page-header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .page-header h1 i {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 0.6rem;
+            border-radius: 12px;
+        }
+        
+        .year-filter {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--bg-secondary);
+            padding: 0.7rem 1.2rem;
+            border-radius: 12px;
+        }
+        
+        .year-filter label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .year-filter select {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            min-width: 100px;
+        }
+        
+        .tab-container {
+            margin-bottom: 2rem;
+        }
+        
+        .tab-nav {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        .tab-btn {
+            background: var(--bg-secondary);
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--accent-color);
+        }
+        
+        .section-heading .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .section-heading .btn-secondary:hover {
+            background: var(--border-color);
+        }
+        
+        /* Payment Tables */
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-glass);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .payment-table thead th {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            text-align: left;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .payment-table tbody tr {
+            transition: all 0.3s ease;
+        }
+        
+        .payment-table tbody tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .payment-table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .payment-table td {
+            padding: 0.8rem 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .expert-name {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .expert-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .payment-value {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .word-count {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .task-count {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Price Per Word Table */
+        .ppw-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            background: var(--bg-glass);
+            backdrop-filter: blur(15px);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        
+        .ppw-table th {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 1rem;
+            text-align: left;
+        }
+        
+        .ppw-table td {
+            padding: 0.8rem 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .ppw-form {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .currency-select {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            border-radius: 6px;
+            min-width: 80px;
+        }
+        
+        .ppw-input {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            border-radius: 6px;
+            width: 80px;
+            text-align: right;
+        }
+        
+        .save-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .save-btn:hover {
+            background: var(--secondary-color);
+        }
+        
+        .save-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-active {
+            background-color: #28a745;
+        }
+        
+        .status-inactive {
+            background-color: #dc3545;
+        }
+        
+        .total-row td {
+            font-weight: bold;
+            background: var(--bg-secondary);
+            border-top: 2px solid var(--border-color);
+        }
+        
+        .monthly-report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+        
+        .monthly-report-table th {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 1rem;
+            text-align: left;
+            z-index: 10;
+        }
+        
+        .monthly-report-table td {
+            padding: 0.8rem 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .monthly-report-table td:nth-child(1) {
+            position: sticky;
+            left: 0;
+            background: var(--bg-secondary);
+            z-index: 1;
+        }
+        
+        .monthly-report-table tr:nth-child(even) td {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .monthly-report-table tr:nth-child(even) td:nth-child(1) {
+            background: var(--bg-secondary);
+        }
+        
+        .monthly-report-container {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        
+        .month-cell {
+            min-width: 120px;
+        }
+        
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            z-index: 9999;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .success-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .error-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            z-index: 9999;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .error-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 768px) {
+            .navbar { left: 0; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .page-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
+            .tab-nav { overflow-x: auto; padding-bottom: 0.5rem; }
+            .tab-btn { white-space: nowrap; }
+            .ppw-form { flex-wrap: wrap; }
+            .payment-table { font-size: 0.9rem; }
+            .expert-avatar { width: 30px; height: 30px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">TEXVO</div>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="{% url 'accounts:admin_dashboard' %}" class="menu-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span class="menu-text">Dashboard</span>
+            </a>
+            <a href="{% url 'accounts:user_management' %}" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span class="menu-text">User Management</span>
+            </a>
+            <a href="{% url 'accounts:task_management' %}" class="menu-item">
+                <i class="fas fa-tasks"></i>
+                <span class="menu-text">Tasks</span>
+            </a>
+            <a href="{% url 'accounts:invoice_management' %}" class="menu-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span class="menu-text">Invoices</span>
+            </a>
+            <a href="{% url 'accounts:expert_payments' %}" class="menu-item active">
+                <i class="fas fa-money-bill-wave"></i>
+                <span class="menu-text">Payments</span>
+            </a>
+            <a href="{% url 'accounts:calendar_view' %}" class="menu-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="menu-text">Calendar</span>
+            </a>
+            <a href="{% url 'accounts:settings' %}" class="menu-item">
+                <i class="fas fa-shield-alt"></i>
+                <span class="menu-text">Settings</span>
+            </a>
+        </nav>
+    </div>
+
+    <nav class="navbar" id="navbar">
+        <div class="navbar-content">
+            <div class="navbar-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">Expert Payments</div>
+            </div>
+            <div class="navbar-right">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-info">
+                    <span>{{ user.username }}</span>
+                </div>
+                <a href="{% url 'accounts:logout' %}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content" id="mainContent">
+        <div class="page-header">
+            <h1><i class="fas fa-money-bill-wave"></i> Expert Payments Dashboard</h1>
+            <form class="year-filter" method="get" action="{% url 'accounts:expert_payments' %}">
+                <label for="year">Select Year:</label>
+                <select id="year" name="year" onchange="this.form.submit()">
+                    {% for yr in available_years %}
+                        <option value="{{ yr }}" {% if yr == current_year %}selected{% endif %}>{{ yr }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        <div class="tab-container">
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="monthly-report">Monthly Report</button>
+                <button class="tab-btn" data-tab="ppw-settings">Expert Rates</button>
+            </div>
+
+            <!-- Monthly Report Tab -->
+            <div class="tab-content active" id="monthly-report">
+                <div class="section-heading">
+                    <h2>Monthly Words & Payments ({{ current_year }})</h2>
+                    <button class="btn-secondary" onclick="exportToExcel('monthly-report-table')">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+
+                <div class="monthly-report-container">
+                    <table class="monthly-report-table" id="monthly-report-table">
+                        <thead>
+                            <tr>
+                                <th>Expert</th>
+                                {% for month in months %}
+                                    <th class="month-cell">{{ month.name }}</th>
+                                {% endfor %}
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expert_id, data in expert_data.items %}
+                                <tr>
+                                    <td>
+                                        <div class="expert-name">
+                                            <div class="expert-avatar">
+                                                {{ data.name|slice:":1" }}
+                                            </div>
+                                            {{ data.name }}
+                                        </div>
+                                    </td>
+                                    {% for month in months %}
+                                        <td class="month-cell">
+                                            <div class="word-count">{{ data.monthly_data|get_item:month.number|get_item:"words"|intcomma }} words</div>
+                                            <div class="task-count">{{ data.monthly_data|get_item:month.number|get_item:"tasks" }} tasks</div>
+                                            <div class="payment-value">
+                                                {{ data.pay_rate.currency_symbol }}{{ data.monthly_data|get_item:month.number|get_item:"payment"|floatformat:2 }}
+                                            </div>
+                                        </td>
+                                    {% endfor %}
+                                    <td>
+                                        <div class="word-count">{{ data.yearly_total.words|intcomma }} words</div>
+                                        <div class="task-count">{{ data.yearly_total.tasks }} tasks</div>
+                                        <div class="payment-value">
+                                            {{ data.pay_rate.currency_symbol }}{{ data.yearly_total.payment|floatformat:2 }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="{{ months|length|add:2 }}">No experts found</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PPW Settings Tab -->
+            <div class="tab-content" id="ppw-settings">
+                <div class="section-heading">
+                    <h2>Expert Price Per Word Settings</h2>
+                </div>
+
+                <table class="ppw-table">
+                    <thead>
+                        <tr>
+                            <th>Expert</th>
+                            <th>Price Per Word</th>
+                            <th>Status</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expert_id, data in expert_data.items %}
+                            <tr>
+                                <td>
+                                    <div class="expert-name">
+                                        <div class="expert-avatar">
+                                            {{ data.name|slice:":1" }}
+                                        </div>
+                                        {{ data.name }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <form class="ppw-form" data-expert-id="{{ expert_id }}">
+                                        <select class="currency-select" name="currency">
+                                            {% for code, name in currency_choices %}
+                                                <option value="{{ code }}" {% if data.pay_rate.currency == code %}selected{% endif %}>{{ name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <input type="number" class="ppw-input" name="ppw" value="{{ data.pay_rate.price_per_word }}" step="0.001" min="0">
+                                        <button type="button" class="save-btn" onclick="updatePPW({{ expert_id }})">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <span class="status-indicator {% if data.pay_rate.active %}status-active{% else %}status-inactive{% endif %}"></span>
+                                    {{ data.pay_rate.active|yesno:"Active,Inactive" }}
+                                </td>
+                                <td>
+                                    {{ data.pay_rate.updated_at|date:"M d, Y H:i" }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4">No experts found</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            <i class="fas fa-check-circle"></i> <span id="successText"></span>
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i> <span id="errorText"></span>
+        </div>
+    </main>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const themeIcon = themeToggle.querySelector('i');
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        body.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Sidebar Toggle
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const navbar = document.getElementById('navbar');
+        const mainContent = document.getElementById('mainContent');
+
+        // Mobile responsiveness
+        function handleMobileLayout() {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                sidebar.classList.remove('collapsed');
+                navbar.classList.remove('sidebar-collapsed');
+                mainContent.classList.remove('sidebar-collapsed');
+            } else {
+                sidebar.classList.remove('mobile-open');
+            }
+        }
+
+        sidebarToggle.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                navbar.classList.toggle('sidebar-collapsed');
+                mainContent.classList.toggle('sidebar-collapsed');
+                
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+            }
+        });
+
+        window.addEventListener('resize', handleMobileLayout);
+        handleMobileLayout();
+
+        // Close mobile sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !sidebarToggle.contains(e.target) &&
+                sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+        
+        // Tab functionality
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                
+                // Update active tab button
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Show active tab content
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Update PPW function
+        function updatePPW(expertId) {
+            const form = document.querySelector(`form[data-expert-id="${expertId}"]`);
+            const ppwInput = form.querySelector('input[name="ppw"]');
+            const currencySelect = form.querySelector('select[name="currency"]');
+            const saveBtn = form.querySelector('.save-btn');
+            
+            // Validate input
+            const ppw = parseFloat(ppwInput.value);
+            if (isNaN(ppw) || ppw <= 0) {
+                showError("Please enter a valid price per word");
+                return;
+            }
+            
+            // Disable button during request
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving';
+            
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('expert_id', expertId);
+            formData.append('ppw', ppw);
+            formData.append('currency', currencySelect.value);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            
+            // Send AJAX request
+            fetch('{% url "accounts:expert_payments" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess(data.message);
+                } else {
+                    showError(data.message || "An error occurred");
+                }
+            })
+            .catch(error => {
+                showError("Network error occurred");
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                // Re-enable button
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+            });
+        }
+        
+        // Success message function
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            
+            successText.textContent = message;
+            successMessage.classList.add('show');
+            
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Error message function
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            errorText.textContent = message;
+            errorMessage.classList.add('show');
+            
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Export to Excel function
+        function exportToExcel(tableId) {
+            // Create a workbook
+            const table = document.getElementById(tableId);
+            const ws = XLSX.utils.table_to_sheet(table);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Expert Payments");
+            
+            // Generate file name with current date
+            const date = new Date();
+            const fileName = `Expert_Payments_${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}.xlsx`;
+            
+            // Save file
+            XLSX.writeFile(wb, fileName);
+        }
+        
+        // Template filter for accessing dictionary items by key
+        window.django = {
+            template: {
+                filters: {
+                    get_item: function(obj, key) {
+                        return obj[key];
+                    }
+                }
+            }
+        };
+    </script>
+    
+    <!-- SheetJS library for Excel export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</body>
+</html>
